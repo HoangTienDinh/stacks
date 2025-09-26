@@ -1,0 +1,10 @@
+
+// Small fallback list for local dev; replaced by assets/words5.txt if present.
+const WORDS = [
+  'QUEUE', 'BRACE', 'CRACK', 'STACK', 'SHORT', 'SHARE',
+  'START', 'SMART', 'STONE', 'STORK', 'STAND', 'CRANE', 'CRANK', 'TRACE',
+  'ABOUT', 'OTHER', 'WHICH', 'THEIR', 'THERE', 'WORDS', 'SMILE', 'ROAST', 'ALTER',
+  'CRATE', 'REACT', 'ROUND', 'SOUND', 'BOUND',
+  'BRICK', 'CLICK', 'CLOCK', 'SHOCK', 'SHACK', 'TRACK'
+]
+export const SMALL_SET = new Set(WORDS)
