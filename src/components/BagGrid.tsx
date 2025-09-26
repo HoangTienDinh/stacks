@@ -1,36 +1,65 @@
-
-import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors, useDraggable } from '@dnd-kit/core'
+import { useState } from 'react'
+import { useDraggable, useDndMonitor } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { useGameStore } from '@/store/gameStore'
 import { Tile } from './Tile'
 
 export function BagGrid() {
-  const { puzzle, usedIndices, pushLetter } = useGameStore(s => ({ puzzle: s.puzzle, usedIndices: s.usedIndices, pushLetter: s.pushLetter }))
-  const sensors = useSensors(useSensor(PointerSensor))
+  const { puzzle, usedIndices, pushLetter } = useGameStore(s => ({
+    puzzle: s.puzzle, usedIndices: s.usedIndices, pushLetter: s.pushLetter
+  }))
 
-  const onDragEnd = (e: DragEndEvent) => {
-    const letter = (e.active?.data?.current as any)?.letter as string | undefined
-    if (letter) pushLetter(letter)
-  }
+  // Track if a drag is currently in-flight to avoid firing click during drags
+  const [isDragging, setIsDragging] = useState(false)
+  useDndMonitor({
+    onDragStart() { setIsDragging(true) },
+    onDragEnd()   { setTimeout(() => setIsDragging(false), 0) },
+    onDragCancel(){ setIsDragging(false) },
+  })
 
   return (
-    <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-      <div className="bag-grid mt-4">
-        {puzzle.bagList.map((ch, i) => (
-          <DraggableTile key={i} letter={ch} muted={usedIndices.has(i)} />
-        ))}
-      </div>
-    </DndContext>
+    <div className="bag-grid mt-4">
+      {puzzle.bagList.map((ch, i) => (
+        <DraggableTile
+          key={i}
+          id={`bag-${i}`}
+          letter={ch}
+          muted={usedIndices.has(i)}
+          onActivate={() => !usedIndices.has(i) && !isDragging && pushLetter(ch)}
+        />
+      ))}
+    </div>
   )
 }
 
-function DraggableTile({ letter, muted }: { letter: string; muted: boolean }) {
-  const pushLetter = useGameStore(s => s.pushLetter)
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: `bag-${letter}-${Math.random()}`, data: { letter } })
-  const style = transform ? { transform: CSS.Transform.toString(transform) } : undefined
+function DraggableTile({
+  id, letter, muted, onActivate,
+}: { id: string; letter: string; muted: boolean; onActivate: () => void }) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id,
+    data: { letter },
+  })
+
+  const style = {
+    transform: transform ? CSS.Transform.toString(transform) : undefined,
+    // Important for iOS Safari touch dragging
+    touchAction: 'none' as const,
+  }
+
+  // Use a <button> for perfect click semantics on desktop
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...(!muted ? listeners : {})} onClick={() => !muted && pushLetter(letter)} className={muted ? 'pointer-events-none' : ''}>
+    <button
+      type="button"
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...(!muted ? listeners : {})}
+      onClick={onActivate}
+      disabled={muted}
+      className={muted ? 'pointer-events-none' : ''}
+      aria-label={`Bag tile ${letter}`}
+    >
       <Tile letter={letter} muted={muted} />
-    </div>
+    </button>
   )
 }

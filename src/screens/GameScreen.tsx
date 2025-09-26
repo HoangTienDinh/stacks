@@ -9,7 +9,14 @@ import { Toast } from '@/components/Toast'
 import { loadFullDictionary } from '@/game/dictionary'
 import { RollColumn } from '@/components/RollColumn'
 
-import { DndContext, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
+import {
+  DndContext,
+  DragEndEvent,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
 
 export function GameScreen() {
   const { loadToday, error, puzzle, history, currentStack, candidate, setCandidate } = useGameStore(s => ({
@@ -24,7 +31,12 @@ export function GameScreen() {
 
   useEffect(() => { loadToday(); loadFullDictionary() }, [])
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
+  const sensors = useSensors(
+  // Small mouse movement starts drag
+  useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
+  // Touch needs a tiny hold + tolerance so scrolling still works
+  useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+)
 
   const onDragEnd = (e: DragEndEvent) => {
     const letter = (e.active?.data?.current as any)?.letter as string | undefined

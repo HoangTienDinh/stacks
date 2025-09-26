@@ -8,6 +8,7 @@
 .tile { @apply inline-flex items-center justify-center rounded-tile border border-gray-300 shadow-tile bg-white text-gray-900 font-bold select-none; }
 .tile-muted { @apply opacity-30; }
 .tile-lg { @apply w-16 h-16 text-2xl sm:w-20 sm:h-20 sm:text-3xl; }
+.tile:hover { @apply shadow-md; }
 
 .bag-grid { @apply grid grid-cols-5 gap-3 sm:gap-4; }
 
