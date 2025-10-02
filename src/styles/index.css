@@ -21,3 +21,24 @@ button:disabled .tile { @apply opacity-30; }
 
 .modal-backdrop { @apply fixed inset-0 bg-black/40 flex items-center justify-center p-4; }
 .modal-card { @apply bg-white rounded-2xl p-6 w-full max-w-sm; }
+
+/* Error state: soft red bg + shake */
+.tile-error {
+  @apply bg-red-50 border-red-300 ring-2 ring-red-400 ring-offset-2 ring-offset-white;
+  animation: tile-shake 160ms ease-in-out;
+}
+
+@keyframes tile-shake {
+  0%   { transform: translateX(0) }
+  20%  { transform: translateX(-3px) }
+  40%  { transform: translateX(3px) }
+  60%  { transform: translateX(-2px) }
+  80%  { transform: translateX(2px) }
+  100% { transform: translateX(0) }
+}
+
+/* from-stack hint (unchanged) */
+.tile-from-stack { @apply bg-cyan-50 border-cyan-300; }
+
+/* from-bag hint: soft green */
+.tile-from-bag { @apply bg-emerald-50 border-emerald-300; }
