@@ -8,11 +8,13 @@ import { Toast } from '@/components/Toast'
 import { loadDictionaries } from '@/game/dictionary'
 import { RollColumn } from '@/components/RollColumn'
 import { FlightLayer } from '@/components/FlightLayer'
+import { KeyboardToggle } from '@/components/KeyboardToggle'
+import { MobileKeyboard } from '@/components/MobileKeyboard'
 
 export function GameScreen() {
   const {
     loadToday, error, puzzle, history, currentStack,
-    typeLetter, popLetter, submit, candidate, slotMeta
+    typeLetter, popLetter, submit, candidate, slotMeta, pickStackPos,
   } = useGameStore(s => ({
     loadToday: s.loadToday,
     error: s.error,
@@ -24,6 +26,7 @@ export function GameScreen() {
     submit: s.submit,
     candidate: s.candidate,
     slotMeta: s.slotMeta,
+    pickStackPos: s.pickStackPos,
   }))
 
   useEffect(() => { loadToday(); loadDictionaries() }, [])
@@ -52,10 +55,12 @@ export function GameScreen() {
 
   return (
     <div className="mx-auto max-w-sm sm:max-w-md px-4 pt-4 pb-32">
-      <RollColumn words={rollWords} />
+      <RollColumn words={rollWords} onPick={pickStackPos} />
       <div className="mt-6"><CandidateRow /></div>
       <BagGrid />
       <ControlsBar />
+      <KeyboardToggle />      {/* mobile-only */}
+      <MobileKeyboard />      {/* mobile-only */}
       <ResultModal />
       {error && <Toast message={error} />}
       <FlightLayer />

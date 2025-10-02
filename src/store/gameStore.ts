@@ -21,6 +21,9 @@ export type Actions = {
   undo: () => void
   undoTo: (index: number) => void
   consumeFlight: (id: string) => void
+  setKeyboardOpen: (open: boolean) => void
+  toggleKeyboard: () => void
+  pickStackPos: (pos: number) => void
 }
 
 export type UIState = {
@@ -30,6 +33,7 @@ export type UIState = {
   previewReserved: Set<number> // bag indices reserved during typing
   reduceMotion: boolean
   flights: Flight[]
+  keyboardOpen: boolean
 }
 
 const firstEmpty = (s: string) => s.padEnd(5, ' ').slice(0,5).indexOf(' ')
@@ -44,6 +48,7 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
   status: 'playing',
   startedAt: null,
   endedAt: null,
+  keyboardOpen: false,
 
   candidate: '',
   error: null,
@@ -239,6 +244,31 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
   }),
 
   consumeFlight: (id) => set((s) => ({ flights: s.flights.filter(f => f.id !== id) })),
+
+  setKeyboardOpen: (open) => set({ keyboardOpen: open }),
+  toggleKeyboard: () => set((s) => ({ keyboardOpen: !s.keyboardOpen })),
+
+  // Tap a letter from the current stack at position `pos`
+  pickStackPos: (pos) => {
+    const S = get()
+    const idx = S.candidate.padEnd(5, ' ').slice(0,5).indexOf(' ')
+    if (idx === -1) return // row full
+    // Must be positional: only allowed if next empty slot equals pos
+    if (idx !== pos) {
+      set({ error: 'Use the letter in the matching slot' })
+      import('@/utils/sound').then(m => m.signalError?.())
+      setTimeout(() => set({ error: null }), 900)
+      return
+    }
+    const letter = S.currentStack[pos]
+    const arr = S.candidate.padEnd(5, ' ').slice(0,5).split('')
+    const meta = [...S.slotMeta]
+    meta[idx] = { source: 'stack', stackPos: pos }
+    const candidate = (() => { arr[idx] = letter; return arr.join('') })()
+    const flight = { id: Math.random().toString(36).slice(2,10), letter, from: { type: 'stack' as const, pos }, to: { slot: idx } }
+    set({ candidate, slotMeta: meta, flights: [...S.flights, flight] })
+  },
+
 }))
 
 function putAt(arr: string[], idx: number, ch: string) { const a = [...arr]; a[idx] = ch; return a }
