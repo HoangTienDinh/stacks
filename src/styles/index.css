@@ -9,6 +9,7 @@
 .tile-muted { @apply opacity-30; }
 .tile-lg { @apply w-16 h-16 text-2xl sm:w-20 sm:h-20 sm:text-3xl; }
 .tile:hover { @apply shadow-md; }
+button:disabled .tile { @apply opacity-30; }
 
 .bag-grid { @apply grid grid-cols-5 gap-3 sm:gap-4; }
 
