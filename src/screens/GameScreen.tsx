@@ -5,7 +5,7 @@ import { CandidateRow } from '@/components/CandidateRow'
 import { ControlsBar } from '@/components/ControlsBar'
 import { ResultModal } from '@/components/ResultModal'
 import { Toast } from '@/components/Toast'
-import { loadFullDictionary } from '@/game/dictionary'
+import { loadDictionaries } from '@/game/dictionary'
 import { RollColumn } from '@/components/RollColumn'
 import { FlightLayer } from '@/components/FlightLayer'
 
@@ -26,7 +26,7 @@ export function GameScreen() {
     slotMeta: s.slotMeta,
   }))
 
-  useEffect(() => { loadToday(); loadFullDictionary() }, [])
+  useEffect(() => { loadToday(); loadDictionaries() }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

@@ -1,19 +1,43 @@
-
 import { SMALL_SET } from './wordlist'
 
-let WORD_SET: Set<string> = new Set(SMALL_SET)
+let ALLOWED = new Set<string>(SMALL_SET) // fallback
+let BANNED = new Set<string>()           // empty by default
+let READY = false
 
-export async function loadFullDictionary() {
+export async function loadDictionaries() {
   try {
-    const mod = await import('@/assets/words5.txt?raw')
-    const txt: string = (mod as any).default
-    const lines = txt.split(/\r?\n/).map(s => s.trim().toUpperCase()).filter(Boolean)
-    if (lines.length > 100) {
-      WORD_SET = new Set(lines)
+    const allowedMod = await import('@/assets/allowed5.txt?raw')
+    const bannedMod  = await import('@/assets/banned5.txt?raw')
+
+    const toLines = (raw: string) =>
+      raw.split(/\r?\n/).map(s => s.trim().toUpperCase()).filter(s => /^[A-Z]{5}$/.test(s))
+
+    const allowedLines = toLines((allowedMod as any).default || '')
+    const bannedLines  = toLines((bannedMod as any).default || '')
+
+    // Use allowed list if it's reasonably big; otherwise keep SMALL_SET
+    if (allowedLines.length >= 2000) {
+      ALLOWED = new Set(allowedLines)
     } else {
-      WORD_SET = new Set(lines.concat(Array.from(SMALL_SET)))
+      // Merge whatever lines you have on top of SMALL_SET
+      ALLOWED = new Set([...Array.from(SMALL_SET), ...allowedLines])
     }
-  } catch {}
+    BANNED = new Set(bannedLines)
+    READY = true
+    return { allowed: ALLOWED.size, banned: BANNED.size }
+  } catch (e) {
+    // Keep fallbacks
+    READY = true
+    return { allowed: ALLOWED.size, banned: BANNED.size }
+  }
 }
 
-export const hasWord = (w: string) => WORD_SET.has(w.toUpperCase())
+export function hasWord(w: string) {
+  return ALLOWED.has(w.toUpperCase())
+}
+export function isBanned(w: string) {
+  return BANNED.has(w.toUpperCase())
+}
+
+// Useful for guards (optional)
+export function dictionariesReady() { return READY }
