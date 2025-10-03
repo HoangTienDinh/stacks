@@ -8,13 +8,14 @@ import { Toast } from '@/components/Toast'
 import { loadDictionaries } from '@/game/dictionary'
 import { RollColumn } from '@/components/RollColumn'
 import { FlightLayer } from '@/components/FlightLayer'
-import { KeyboardToggle } from '@/components/KeyboardToggle'
 import { MobileKeyboard } from '@/components/MobileKeyboard'
+import { BagCounts } from '@/components/BagCounts'
 
 export function GameScreen() {
   const {
     loadToday, error, puzzle, history, currentStack,
     typeLetter, popLetter, submit, candidate, slotMeta, pickStackPos,
+    keyboardOpen,
   } = useGameStore(s => ({
     loadToday: s.loadToday,
     error: s.error,
@@ -27,6 +28,7 @@ export function GameScreen() {
     candidate: s.candidate,
     slotMeta: s.slotMeta,
     pickStackPos: s.pickStackPos,
+    keyboardOpen: s.keyboardOpen,
   }))
 
   useEffect(() => { loadToday(); loadDictionaries() }, [])
@@ -54,13 +56,34 @@ export function GameScreen() {
   ]
 
   return (
-    <div className="mx-auto max-w-sm sm:max-w-md px-4 pt-4 pb-32">
-      <RollColumn words={rollWords} onPick={pickStackPos} />
-      <div className="mt-6"><CandidateRow /></div>
-      <BagGrid />
+    <div className="h-[100dvh] flex flex-col">
+      {/* Top: rolling stacks area (grows), centered */}
+      <div className="px-4 pt-4 flex-1 flex flex-col">
+        <RollColumn words={rollWords} onPick={pickStackPos} />
+        <div className="mt-4">
+          <CandidateRow />
+        </div>
+
+        {/* Bag or Counts (no scrolling; keep everything visible) */}
+        {/* <div className={keyboardOpen ? 'pt-2 pb-48' : 'pt-2 pb-28'}>
+          {keyboardOpen ? <BagCounts /> : <BagGrid />}
+        </div> */}
+        <div
+          className="pt-2"
+          style={{
+            // When keyboard is open, reserve ~300px + safe-area so nothing overlaps
+            paddingBottom: keyboardOpen
+              ? 'calc(env(safe-area-inset-bottom, 0px) + 300px)'
+              : '7rem' // ≈ pb-28
+          }}
+        >
+          {keyboardOpen ? <BagCounts /> : <BagGrid />}
+        </div>
+      </div>
+
+      {/* Footer + mobile keyboard overlay */}
       <ControlsBar />
-      <KeyboardToggle />      {/* mobile-only */}
-      <MobileKeyboard />      {/* mobile-only */}
+      <MobileKeyboard />
       <ResultModal />
       {error && <Toast message={error} />}
       <FlightLayer />

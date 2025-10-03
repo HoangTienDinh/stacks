@@ -42,3 +42,7 @@ button:disabled .tile { @apply opacity-30; }
 
 /* from-bag hint: soft green */
 .tile-from-bag { @apply bg-emerald-50 border-emerald-300; }
+
+/* Full-height app, no page scroll */
+html, body, #root { height: 100%; }
+body { overflow: hidden; overscroll-behavior: contain; }

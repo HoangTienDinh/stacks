@@ -42,7 +42,7 @@ export function BagGrid() {
   }))
 
   return (
-    <div className="bag-grid mt-4">
+    <div className="bag-grid mt-4 mb-4">
       {puzzle.bagList.map((ch, i) => {
         const muted = usedIndices.has(i) || previewReserved.has(i)
         return (
