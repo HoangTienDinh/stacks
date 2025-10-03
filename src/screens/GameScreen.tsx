@@ -10,8 +10,13 @@ import { RollColumn } from '@/components/RollColumn'
 import { FlightLayer } from '@/components/FlightLayer'
 import { MobileKeyboard } from '@/components/MobileKeyboard'
 import { BagCounts } from '@/components/BagCounts'
+import { useState } from 'react'
+import { InfoButton } from '@/components/InfoButton'
+import { HelpModal } from '@/components/HelpModal'
 
 export function GameScreen() {
+  const [helpOpen, setHelpOpen] = useState(false)
+
   const {
     loadToday, error, puzzle, history, currentStack,
     typeLetter, popLetter, submit, candidate, slotMeta, pickStackPos,
@@ -57,6 +62,9 @@ export function GameScreen() {
 
   return (
     <div className="h-[100dvh] flex flex-col">
+      {/* Lightbulb button (top-right) */}
+      <InfoButton onClick={() => setHelpOpen(true)} />
+
       {/* Top: rolling stacks area (grows), centered */}
       <div className="px-4 pt-4 flex-1 flex flex-col">
         <RollColumn words={rollWords} onPick={pickStackPos} />
@@ -87,6 +95,9 @@ export function GameScreen() {
       <ResultModal />
       {error && <Toast message={error} />}
       <FlightLayer />
+
+      {/* How to Play modal */}
+      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   )
 }
