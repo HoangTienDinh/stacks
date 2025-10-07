@@ -5,6 +5,7 @@ import { counts } from '@/game/counts'
 import { validateMove } from '@/game/validate'
 import { applyMove, replayUsedIndices } from '@/game/apply'
 import { signalError } from '@/utils/sound'
+import { BAG_SIZE } from '@/game/constants'
 
 type SlotMeta = { source: 'bag' | 'stack' | 'error' | null; bagIndex?: number; stackPos?: number }
 type Flight = { id: string; letter: string; from: { type: 'bag'; index: number } | { type: 'stack'; pos: number }; to: { slot: number } }
@@ -39,6 +40,18 @@ export type UIState = {
 const firstEmpty = (s: string) => s.padEnd(5, ' ').slice(0,5).indexOf(' ')
 const lastFilled = (s: string) => s.trimEnd().length - 1
 
+// --- NEW: keep bag at 12 tiles safely (legacy puzzles may have 15) ---
+function normalizeBag12(list: string[]): string[] {
+  if (!Array.isArray(list)) return []
+  if (list.length === BAG_SIZE) return list
+  if (list.length > BAG_SIZE) {
+    console.warn(`[Stacks] bag has ${list.length} tiles; slicing to ${BAG_SIZE}.`)
+    return list.slice(0, BAG_SIZE)
+  }
+  console.warn(`[Stacks] bag has ${list.length} tiles; expected ${BAG_SIZE}. Using as-is.`)
+  return list
+}
+
 export const useGameStore = create<GameState & Actions & UIState>((set, get) => ({
   puzzle: { date: '0000-00-00', wordOfDay: 'QUEUE', bagList: [] },
   currentStack: 'QUEUE',
@@ -60,8 +73,9 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
   loadToday: (dateKey) => {
     const key = dateKey || new Date().toISOString().slice(0,10)
     const p = (puzzles as Record<string, Omit<DailyPuzzle, 'date'>>)[key] || (puzzles as any)[Object.keys(puzzles)[0]]
-    const puzzle: DailyPuzzle = { date: key, wordOfDay: p.wordOfDay, bagList: p.bagList }
-    const bagCounts = counts(p.bagList.join(''))
+    const normalizedBag = normalizeBag12(p.bagList)
+    const puzzle: DailyPuzzle = { date: key, wordOfDay: p.wordOfDay, bagList: normalizedBag }
+    const bagCounts = counts(normalizedBag.join(''))
     set({
       puzzle,
       currentStack: puzzle.wordOfDay.toUpperCase(),

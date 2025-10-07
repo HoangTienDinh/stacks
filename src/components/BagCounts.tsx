@@ -35,8 +35,8 @@ export function BagCounts() {
   return (
     <div className="mx-auto max-w-md px-4 pb-4">
       <div
-        className="grid gap-1"
-        style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(52px, 1fr))' }}
+        className="grid justify-center gap-2"
+        style={{ gridTemplateColumns: 'repeat(4, minmax(52px, 1fr))' }} // ⬅️ fixed 4 columns
       >
         {lettersInBag.map(l => {
           const avail = Math.max(0, (bagCounts[l] || 0) - (previewDelta[l] || 0))

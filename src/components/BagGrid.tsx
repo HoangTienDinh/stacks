@@ -13,7 +13,7 @@ export function BagGrid() {
     <div className="mt-2 mb-6">
       <div
         className="grid justify-center gap-3 md:gap-4"
-        style={{ gridTemplateColumns: 'repeat(5, auto)' }}
+        style={{ gridTemplateColumns: 'repeat(4, auto)' }} // ⬅️ was 5
       >
         {puzzle.bagList.map((ch, i) => {
           const used = usedIndices.has(i)

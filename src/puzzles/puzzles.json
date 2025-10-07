@@ -1,34 +1,31 @@
 {
   "2025-09-25": {
     "wordOfDay": "QUEUE",
-    "bestPath": ["BRACE", "TRIED", "CROWN", "BREAD"],
+    "bestPath": ["BRACE", "TREAD", "CROWN"],
     "bagList": [
-      "B","R","A","C",   
-      "T","I","D",       
-      "C","O","W","N",  
-      "B","E","A","D"   
+      "B","R","A","C",
+      "T","E","A","D",
+      "C","O","W","N"
     ]
   },
 
   "2025-09-26": {
     "wordOfDay": "CRANE",
-    "bestPath": ["SMOTE", "AMONG", "FROST", "PLAIT"],
+    "bestPath": ["SMOTE", "FROST", "PLAIT"],
     "bagList": [
-      "S","M","O","T",   
-      "A","N","G",       
-      "F","R","S","T",   
-      "P","L","A","I"    
+      "S","M","O","T",
+      "F","R","S","T",
+      "P","L","A","I"
     ]
   },
 
   "2025-09-27": {
     "wordOfDay": "START",
-    "bestPath": ["SMOKE", "MARCH", "FORCE", "SLATE"],
+    "bestPath": ["SMOKE", "CRANE", "PLAIT"],
     "bagList": [
-      "M","O","K","E",   
-      "A","R","C","H",   
-      "F","O","E",       
-      "S","L","A","T"    
+      "M","O","K","E",
+      "C","R","A","N",
+      "P","L","I","T"
     ]
   }
 }

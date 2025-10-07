@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { BAG_SIZE, PERFECT_STACKS } from '@/game/constants'
 
 export function HelpModal({
   open, onClose,
@@ -33,8 +34,10 @@ export function HelpModal({
           </header>
 
           {/* Scrollable content */}
-          <div className="px-4 py-4 space-y-5 text-sm leading-6 text-gray-700 overflow-y-auto"
-               style={{ maxHeight: 'calc(88dvh - 56px - env(safe-area-inset-bottom, 0px))' }}>
+          <div
+            className="px-4 py-4 space-y-5 text-sm leading-6 text-gray-700 overflow-y-auto"
+            style={{ maxHeight: 'calc(88dvh - 56px - env(safe-area-inset-bottom, 0px))' }}
+          >
             {/* Step 1 */}
             <Section
               title="1) Start from the Current Stack"
@@ -61,7 +64,10 @@ export function HelpModal({
             {/* Step 3 */}
             <Section
               title="3) Finish when the Bag is empty"
-              caption="Use ALL tiles in the bag. Your score is how many Stacks it took (e.g., “4 Stacks”)."
+              caption={
+                `Use ALL ${BAG_SIZE} tiles in the bag. A perfect game finishes in ${PERFECT_STACKS} Stacks. ` +
+                `Your score is how many Stacks it took (e.g., “${PERFECT_STACKS} Stacks”).`
+              }
             />
 
             {/* Quick tips */}
