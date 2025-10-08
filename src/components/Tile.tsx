@@ -3,7 +3,7 @@ import clsx from 'clsx'
 type TileProps = {
   letter: string
   muted?: boolean
-  /** visual context: bag = soft green, stack = soft cyan, error = soft red */
+  /** visual context. "bag" = soft green for unused bag tiles */
   intent?: 'default' | 'bag' | 'stack' | 'error'
   className?: string
 }

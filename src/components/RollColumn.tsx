@@ -3,7 +3,6 @@ import { useGameStore } from '@/store/gameStore'
 import clsx from 'clsx'
 
 function UndoChip({ onClick }: { onClick: () => void }) {
-  // Subtle outlined undo (unchanged size)
   return (
     <button
       type="button"
@@ -34,8 +33,10 @@ function Row({
   onPick?: (pos: number) => void
   rightAction?: React.ReactNode
 }) {
-  const scale = faded ? Math.max(0.7, 1 - depth * 0.12) : 1
-  const y = faded ? -depth * 24 : 0
+  // Stronger “crawl” feel: a little larger near the current row,
+  // then shrink & rise as depth increases.
+  const scale = faded ? Math.max(0.66, 0.96 - depth * 0.12) : 1
+  const y     = faded ? -12 - depth * 26 : 0   // slight initial lift
   const opacity = faded ? Math.max(0.35, 0.9 - depth * 0.12) : 1
   const interactive = !!onPick && !faded
 
@@ -50,15 +51,17 @@ function Row({
         <span className={faded ? 'text-xs text-gray-400' : 'text-sm text-gray-900'}>{index}</span>
       </div>
 
-      {/* IMPORTANT: remove letter-spacing when row is interactive so text centers perfectly */}
-      <div className={clsx(
-        interactive ? 'tracking-normal' : 'tracking-[0.3em]',
-        faded ? 'text-gray-400' : 'text-3xl font-semibold'
-      )}>
+      <div
+        className={clsx(
+          interactive ? 'tracking-normal' : 'tracking-[0.3em]',
+          faded
+            ? 'text-2xl sm:text-[28px] text-gray-400 font-semibold'
+            : 'text-3xl font-semibold'
+        )}
+      >
         {word.split('').map((c, i) => {
           const commonProps = markPositions ? { 'data-stack-pos': i } : {}
           if (interactive) {
-            // Current stack tiles: centered letter + soft cyan like CandidateRow "from stack"
             return (
               <button
                 key={i}
@@ -71,17 +74,18 @@ function Row({
                            hover:bg-cyan-100 active:scale-95 transition"
                 aria-label={`Use ${c} from stack slot ${i+1}`}
               >
-                {/* No extra tracking so the glyph is perfectly centered */}
                 <span className="tracking-normal">{c}</span>
               </button>
             )
           }
-          // Faded historical rows (non-interactive, keep the subtle "star-wars" style)
           return (
             <span
               key={i}
               {...commonProps}
-              style={faded ? { display: 'inline-block', transform: 'perspective(420px) rotateX(18deg)' } : undefined}
+              style={{
+                display: 'inline-block',
+                transform: 'perspective(520px) rotateX(18deg)', // enhance 3D feel
+              }}
             >
               {c}{i < word.length - 1 ? ' ' : ''}
             </span>
@@ -103,10 +107,7 @@ export function RollColumn({
 }) {
   const { history, undo } = useGameStore(s => ({ history: s.history, undo: s.undo }))
 
-  // Current row is always last
   const current = words[words.length - 1]
-
-  // Drop muted duplicate of the current word if present
   const olderRaw = words.slice(0, -1)
   const older =
     olderRaw.length && olderRaw[olderRaw.length - 1].word === current.word
@@ -114,8 +115,16 @@ export function RollColumn({
       : olderRaw
 
   return (
-    <div className="relative flex-1 overflow-hidden flex flex-col justify-end items-stretch">
-      <div className="absolute bottom-20 left-0 right-0 flex flex-col gap-1 px-2">
+    // Give the column its own stage and allow overflow above (no clipping).
+    <div className="relative overflow-visible flex flex-col justify-end items-stretch
+                    min-h-[220px] sm:min-h-[260px]">
+      {/* Faded history anchored above the current row. Increase the offset
+         if you later change the current row button size. */}
+      <div
+        className="absolute left-0 right-0 px-2 flex flex-col gap-1
+                   bottom-[60px] sm:bottom-[68px] pointer-events-none"
+        style={{ overflow: 'visible' }}
+      >
         {older.map((w, i) => {
           const depth = older.length - 1 - i
           return (
@@ -130,7 +139,7 @@ export function RollColumn({
         })}
       </div>
 
-      {/* Interactive current row with subtle Undo chip (hide for starter) */}
+      {/* Current row (interactive) */}
       <div className="px-2">
         <Row
           index={current.index}

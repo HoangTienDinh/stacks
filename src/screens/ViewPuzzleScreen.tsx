@@ -3,30 +3,43 @@ import { useEffect, useMemo } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { useGameStore } from '@/store/gameStore'
 import { BackHomeButton } from '@/components/BackHomeButton'
-import { RollColumn } from '@/components/RollColumn'
 import { Tile } from '@/components/Tile'
-import { formatClock, getRecordByDate, makeShare, todayKey } from '@/stats/stats'
+import {
+  formatClock,
+  getRecordByDate,
+  makeShare,
+  todayKey,
+  type LetterSource,
+} from '@/stats/stats'
 
 export default function ViewPuzzleScreen() {
   const go = useUIStore(s => s.go)
-  const { puzzle, loadToday } = useGameStore(s => ({
-    puzzle: s.puzzle,
-    loadToday: s.loadToday,
-  }))
+  const { puzzle, loadToday } = useGameStore(s => ({ puzzle: s.puzzle, loadToday: s.loadToday }))
 
-  // Load today's puzzle to get wordOfDay (for the header of the stack list)
   useEffect(() => { loadToday() }, [loadToday])
 
-  // Fetch finished record; if missing, bounce to Landing
   const record = useMemo(() => getRecordByDate(todayKey()), [])
   useEffect(() => { if (!record) go('landing') }, [record, go])
-
   if (!record) return null
 
-  const words = [
-    { index: 0, word: puzzle.wordOfDay || '' },
-    ...record.rows.map((r, i) => ({ index: i + 1, word: r.word })),
-  ]
+  const inferSources = (prev: string, curr: string): LetterSource[] =>
+    curr.split('').map((c, i) => (prev[i] === c ? 'stack' : 'bag'))
+
+  const playedRows = (() => {
+    const rows: { index: number; word: string; sources: LetterSource[] }[] = []
+    const start = (puzzle.wordOfDay || '').toUpperCase()
+    if (start) rows.push({ index: 0, word: start, sources: Array(5).fill('stack') as LetterSource[] })
+    let prev = start
+    for (let i = 0; i < record.rows.length; i++) {
+      const w = record.rows[i].word.toUpperCase()
+      const srcs = (record.rows[i].sources?.length === 5
+        ? record.rows[i].sources
+        : inferSources(prev, w)) as LetterSource[]
+      rows.push({ index: i + 1, word: w, sources: srcs })
+      prev = w
+    }
+    return rows
+  })()
 
   const onShare = async () => {
     const text = makeShare(record)
@@ -35,49 +48,66 @@ export default function ViewPuzzleScreen() {
   }
 
   return (
-    <div className="min-h-dvh w-full bg-white text-gray-900">
-      {/* fixed back button */}
+    <div className="min-h-dvh w-full bg-white text-gray-900 overflow-hidden">
       <BackHomeButton />
 
-      {/* Same centered column & spacing as GameScreen */}
-      <div
-        className="mx-auto w-full max-w-[680px] px-4"
-        style={{ paddingBottom: '2.5rem' }}
-      >
+      <div className="mx-auto w-full max-w-[520px] px-4">
         <div className="min-h-dvh flex flex-col">
-          {/* my-auto centers content vertically when there’s extra space */}
-          <div className="my-auto pt-6 pb-4">
-            {/* header line */}
-            <div className="mb-3 text-center text-base sm:text-lg text-gray-600">
-              Cleared <span className="font-semibold text-gray-800">{record.stacksCleared}</span>{' '}
-              Stacks in{' '}
-              <span className="font-semibold text-gray-800">{formatClock(record.durationSec)}</span>
+          <div className="my-auto pt-4 pb-6">
+            {/* Rows */}
+            <div className="space-y-2 sm:space-y-2.5">
+              {playedRows.map(({ index, word, sources }) => (
+                <div key={`${index}-${word}`} className="flex justify-center">
+                  <div className="relative flex gap-[clamp(6px,1.5vw,10px)]">
+                    {/* index anchored to the tile row */}
+                    <span className="absolute -left-6 sm:-left-9 top-1/2 -translate-y-1/2 w-6 text-right text-xs text-gray-500 tabular-nums">
+                      {index}
+                    </span>
+
+                    {word.split('').map((ch, i) => (
+                      <Tile
+                        key={i}
+                        letter={ch}
+                        intent={sources[i] === 'stack' ? 'stack' : 'bag'}
+                        className="rounded-2xl shadow-sm
+                                   w-[clamp(34px,9vw,48px)] h-[clamp(34px,9vw,48px)]
+                                   text-[clamp(16px,4.2vw,22px)]"
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* 1) Stacks timeline (read-only) */}
-            <div className="mb-3">
-              <RollColumn words={words} onPick={() => { /* read-only */ }} />
-            </div>
-
-            {/* 2) Spacer where CandidateRow would be */}
-            <div className="h-4" />
-
-            {/* 3) Bag grid — fully muted to show that all tiles were spent */}
-            <div className="mb-3">
+            {/* Bag */}
+            <div className="mt-4 sm:mt-5">
               <div
-                className="grid justify-center gap-2 sm:gap-3"
+                className="grid justify-center gap-[clamp(8px,2vw,12px)]"
                 style={{ gridTemplateColumns: 'repeat(4, auto)' }}
               >
                 {puzzle.bagList.map((ch, i) => (
                   <div key={i} className="pointer-events-none">
-                    <Tile letter={ch} muted intent="bag" />
+                    <Tile
+                      letter={ch}
+                      muted
+                      intent="bag"
+                      className="rounded-2xl
+                                 w-[clamp(42px,10vw,56px)] h-[clamp(42px,10vw,56px)]
+                                 text-[clamp(18px,4.5vw,24px)]"
+                    />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* 4) Actions under the bag (aligned with GameScreen InlineActions style) */}
-            <div className="flex items-center justify-center gap-3">
+            {/* Result line */}
+            <div className="mt-4 text-center text-base sm:text-lg text-gray-700">
+              Cleared <span className="font-semibold text-gray-900">{record.stacksCleared}</span>{' '}
+              Stacks in <span className="font-semibold text-gray-900">{formatClock(record.durationSec)}</span>
+            </div>
+
+            {/* Actions */}
+            <div className="mt-3 flex items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={onShare}
