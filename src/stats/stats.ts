@@ -23,10 +23,13 @@ export function loadGames(): GameRecordV1[] {
 }
 
 export function saveGame(rec: GameRecordV1) {
-  const all = loadGames();
-  // Guard: if a record for this date already exists, keep the first (no replay)
-  if (all.some(r => r.dateKey === rec.dateKey)) return;
-  localStorage.setItem(GKEY, JSON.stringify([...all, rec]));
+  try {
+    const all = loadGames()
+    if (all.some(r => r.dateKey === rec.dateKey)) return
+    localStorage.setItem(GKEY, JSON.stringify([...all, rec]))
+  } catch (e) {
+    console.warn('[Stacks] saveGame failed:', e)
+  }
 }
 
 export function formatClock(sec: number) {

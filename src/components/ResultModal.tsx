@@ -1,31 +1,40 @@
-// src/components/ResultModal.tsx
 import { useMemo } from 'react'
 import { useGameStore } from '@/store/gameStore'
 import { computeStats, formatClock, loadGames, makeShare } from '@/stats/stats'
 import clsx from 'clsx'
 
 export function ResultModal() {
+  // 1) Always call hooks at the top (no conditional returns before hooks)
   const { status, lastGame, closeResults, goHome } = useGameStore(s => ({
     status: s.status,
-    lastGame: s.lastGame,      // we’ll set this when we finish a puzzle
+    lastGame: s.lastGame,
     closeResults: s.closeResults,
-    goHome: s.goHome,          // UI change back to Landing
+    goHome: s.goHome,
   }))
 
-  const open = status === 'cleared' && !!lastGame
-  const allGames = loadGames()
-  const overall = useMemo(() => computeStats(allGames), [status]) // recompute on win
+  // 2) Build the dataset for stats *unconditionally*
+  //    (include the current just-finished game optimistically)
+  const overall = useMemo(() => {
+    const stored = loadGames()
+    const withCurrent =
+      lastGame && !stored.some(g => g.dateKey === lastGame.dateKey)
+        ? [...stored, lastGame]
+        : stored
+    return computeStats(withCurrent)
+  }, [lastGame?.finishedAt]) // recompute after a new finish
 
+  const open = status === 'cleared' && !!lastGame
   if (!open) return null
 
   const onShare = async () => {
     try {
       await navigator.clipboard.writeText(makeShare(lastGame!))
     } catch {
-      // fallback: prompt
       window.prompt('Copy your result:', makeShare(lastGame!))
     }
   }
+
+  const plural = lastGame!.stacksCleared === 1 ? 'Stack' : 'Stacks'
 
   return (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-50">
@@ -47,11 +56,11 @@ export function ResultModal() {
             {/* This game */}
             <div className="text-center">
               <p className="text-xl font-semibold">
-                Cleared {lastGame!.stacksCleared} Stacks in {formatClock(lastGame!.durationSec)}
+                Cleared {lastGame!.stacksCleared} {plural} in {formatClock(lastGame!.durationSec)}
               </p>
             </div>
 
-            {/* Stats header */}
+            {/* Overall stats */}
             <div className="grid grid-cols-4 gap-2 text-center">
               <Stat label="Games" value={overall.gamesPlayed} />
               <Stat label="Avg. Stacks" value={overall.avgStacks} />
@@ -62,7 +71,12 @@ export function ResultModal() {
             {/* Histogram */}
             <div>
               {Object.entries(overall.hist).map(([k, v]) => (
-                <Bar key={k} label={k} value={v} max={Math.max(...Object.values(overall.hist)) || 1} />
+                <Bar
+                  key={k}
+                  label={k}
+                  value={v}
+                  max={Math.max(...Object.values(overall.hist)) || 1}
+                />
               ))}
             </div>
 
@@ -106,12 +120,9 @@ function Bar({ label, value, max }: { label: string; value: number; max: number 
       <div className="w-6 text-right tabular-nums text-sm text-gray-600">{label}</div>
       <div className="flex-1">
         <div className={clsx(
-          "h-6 rounded-md border bg-emerald-50 border-emerald-300 relative overflow-hidden"
+          'h-6 rounded-md border bg-emerald-50 border-emerald-300 relative overflow-hidden'
         )}>
-          <div
-            className="absolute inset-y-0 left-0 bg-emerald-300/70"
-            style={{ width: `${w}%` }}
-          />
+          <div className="absolute inset-y-0 left-0 bg-emerald-300/70" style={{ width: `${w}%` }} />
         </div>
       </div>
       <div className="w-8 text-right tabular-nums text-sm text-gray-600">{value}</div>
