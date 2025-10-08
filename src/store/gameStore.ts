@@ -96,24 +96,37 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
 
   setCandidate: (s) => set({ candidate: s.toUpperCase().slice(0,5) }),
 
-  // Click a bag tile -> use from bag explicitly
   pushLetter: (l) => {
     const S = get()
     const arr = S.candidate.padEnd(5, ' ').slice(0,5).split('')
     const idx = firstEmpty(S.candidate)
     if (idx === -1) return
-    const bagIdx = findBagIndexForLetter(S, l)
+
+    const letter = l.toUpperCase()
+
+    if (S.currentStack[idx] === letter) {
+      const meta = [...S.slotMeta]
+      meta[idx] = { source: 'stack', stackPos: idx }
+      const candidate = putAt(arr, idx, letter).join('')
+      const flight: Flight = { id: cryptoId(), letter, from: { type: 'stack', pos: idx }, to: { slot: idx } }
+      set({ candidate, slotMeta: meta, flights: [...S.flights, flight] })
+      import('@/utils/sound').then(m => m.signalSnap?.())
+      return
+    }
+
+    const bagIdx = findBagIndexForLetter(S, letter)
     if (bagIdx === -1) {
-      set({ error: `No ${l.toUpperCase()} left in bag` })
+      set({ error: `No ${letter} left in bag` })
       signalError()
       setTimeout(() => set({ error: null }), 1200)
       return
     }
     const preview = new Set(S.previewReserved); preview.add(bagIdx)
     const meta = [...S.slotMeta]; meta[idx] = { source: 'bag', bagIndex: bagIdx }
-    const candidate = putAt(arr, idx, l.toUpperCase()).join('')
-    const flight: Flight = { id: cryptoId(), letter: l.toUpperCase(), from: { type: 'bag', index: bagIdx }, to: { slot: idx } }
+    const candidate = putAt(arr, idx, letter).join('')
+    const flight: Flight = { id: cryptoId(), letter, from: { type: 'bag', index: bagIdx }, to: { slot: idx } }
     set({ candidate, slotMeta: meta, previewReserved: preview, flights: [...S.flights, flight] })
+    import('@/utils/sound').then(m => m.signalBag?.())
   },
 
   // Keyboard with positional preference
