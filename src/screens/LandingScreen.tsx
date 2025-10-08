@@ -2,11 +2,13 @@ import { useMemo, useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { LogoWordmark } from '@/components/LogoWordmark'
 import { HelpModal } from '@/components/HelpModal'
+import { ResultModal } from '@/components/ResultModal'
 import { hasRecord, todayKey } from '@/stats/stats'
 
 export default function LandingScreen() {
   const go = useUIStore(s => s.go)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [statsOpen, setStatsOpen] = useState(false)
 
   const todayStr = useMemo(() => {
     try {
@@ -24,14 +26,13 @@ export default function LandingScreen() {
         <div className="w-full max-w-[560px] flex flex-col items-center gap-6 sm:gap-8">
           <LogoWordmark letters="STACKS" />
           
-          {/* Larger on mobile, unchanged vibe on desktop */}
           <p className="text-center leading-tight tracking-tight text-slate-800
                          text-[clamp(22px,6.2vw,40px)]">
             Use every tile.<br />
             Finish in the fewest <span className="font-semibold">Stacks</span>.
           </p>
 
-          {/* CTA stack — slimmer so the logo can dominate */}
+          {/* CTA stack */}
           <div className="w-full flex flex-col items-center gap-3 mt-1">
             {finishedToday ? (
               <button
@@ -67,11 +68,10 @@ export default function LandingScreen() {
 
             <button
               type="button"
-              disabled
+              onClick={() => setStatsOpen(true)}
               className="w-[min(62vw,180px)] h-[clamp(40px,6.5vh,44px)] rounded-full 
                          border border-emerald-300 text-emerald-900 bg-white/60
-                         opacity-70 cursor-not-allowed"
-              title="Coming soon"
+                         hover:bg-white transition"
             >
               Stats
             </button>
@@ -101,6 +101,7 @@ export default function LandingScreen() {
       </footer>
 
       <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <ResultModal source="landing" open={statsOpen} onClose={() => setStatsOpen(false)} />
     </div>
   )
 }
