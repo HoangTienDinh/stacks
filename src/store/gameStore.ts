@@ -34,12 +34,10 @@ export type Actions = {
   setKeyboardOpen: (open: boolean) => void
   toggleKeyboard: () => void
   pickStackPos: (pos: number) => void
-    // timer and results
   startTimer: () => void
   pauseTimer: () => void
   resumeTimer: () => void
   resetTimer: () => void
-  // used by ResultModal navigation
   closeResults: () => void
   goHome: () => void
 }
@@ -110,7 +108,6 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
       snap!.puzzle.bagList.join('') === normalizedBag.join('');
 
     if (samePuzzle) {
-      // Resume from snapshot
       set({
         puzzle,
         currentStack: snap!.currentStack,
@@ -139,7 +136,6 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
       return
     }
 
-    // Fresh start (no matching snapshot)
     const bagCounts = counts(normalizedBag.join(''))
     set({
       puzzle,
@@ -165,6 +161,8 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
         ? window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
         : false,
     })
+
+    get().shuffleBag()
   },
 
   setCandidate: (s) => set({ candidate: s.toUpperCase().slice(0,5) }),

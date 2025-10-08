@@ -1,4 +1,3 @@
-// src/screens/ViewPuzzleScreen.tsx
 import { useEffect, useMemo } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { useGameStore } from '@/store/gameStore'
