@@ -59,7 +59,6 @@ export type UIState = {
 const firstEmpty = (s: string) => s.padEnd(5, ' ').slice(0,5).indexOf(' ')
 const lastFilled = (s: string) => s.trimEnd().length - 1
 
-// --- NEW: keep bag at 12 tiles safely (legacy puzzles may have 15) ---
 function normalizeBag12(list: string[]): string[] {
   if (!Array.isArray(list)) return []
   if (list.length === BAG_SIZE) return list

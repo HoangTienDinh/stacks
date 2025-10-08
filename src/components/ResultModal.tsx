@@ -2,9 +2,9 @@ import { useMemo } from 'react'
 import { useGameStore } from '@/store/gameStore'
 import { computeStats, formatClock, loadGames, makeShare } from '@/stats/stats'
 import clsx from 'clsx'
+import { Modal } from '@/components/Modal'
 
 export function ResultModal() {
-  // 1) Always call hooks at the top (no conditional returns before hooks)
   const { status, lastGame, closeResults, goHome } = useGameStore(s => ({
     status: s.status,
     lastGame: s.lastGame,
@@ -12,8 +12,6 @@ export function ResultModal() {
     goHome: s.goHome,
   }))
 
-  // 2) Build the dataset for stats *unconditionally*
-  //    (include the current just-finished game optimistically)
   const overall = useMemo(() => {
     const stored = loadGames()
     const withCurrent =
@@ -21,7 +19,7 @@ export function ResultModal() {
         ? [...stored, lastGame]
         : stored
     return computeStats(withCurrent)
-  }, [lastGame?.finishedAt]) // recompute after a new finish
+  }, [lastGame?.finishedAt])
 
   const open = status === 'cleared' && !!lastGame
   if (!open) return null
@@ -37,70 +35,65 @@ export function ResultModal() {
   const plural = lastGame!.stacksCleared === 1 ? 'Stack' : 'Stacks'
 
   return (
-    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/30" onClick={closeResults} />
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="w-[min(92vw,560px)] max-h-[88dvh] overflow-auto rounded-2xl bg-white shadow-2xl border">
-          <header className="flex items-center justify-between px-4 py-3 border-b">
-            <h2 className="text-lg font-semibold">Results</h2>
-            <button
-              type="button"
-              onClick={closeResults}
-              className="rounded-lg border px-2 py-1 text-sm hover:bg-gray-50"
-            >
-              Close
-            </button>
-          </header>
+    <Modal open={open} onClose={closeResults} ariaLabel="Results">
+      <header className="flex items-center justify-between px-4 py-3 border-b">
+        <h2 className="text-lg font-semibold">Results</h2>
+        <button
+          type="button"
+          onClick={closeResults}
+          className="rounded-lg border px-2 py-1 text-sm hover:bg-gray-50"
+        >
+          Close
+        </button>
+      </header>
 
-          <div className="px-4 py-4 space-y-4">
-            {/* This game */}
-            <div className="text-center">
-              <p className="text-xl font-semibold">
-                Cleared {lastGame!.stacksCleared} {plural} in {formatClock(lastGame!.durationSec)}
-              </p>
-            </div>
+      <div className="px-4 py-4 space-y-4">
+        {/* This game */}
+        <div className="text-center">
+          <p className="text-xl font-semibold">
+            Cleared {lastGame!.stacksCleared} {plural} in {formatClock(lastGame!.durationSec)}
+          </p>
+        </div>
 
-            {/* Overall stats */}
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <Stat label="Games" value={overall.gamesPlayed} />
-              <Stat label="Avg. Stacks" value={overall.avgStacks} />
-              <Stat label="Current Streak" value={overall.currentStreak} />
-              <Stat label="Max Streak" value={overall.maxStreak} />
-            </div>
+        {/* Overall stats */}
+        <div className="grid grid-cols-4 gap-2 text-center">
+          <Stat label="Games" value={overall.gamesPlayed} />
+          <Stat label="Avg. Stacks" value={overall.avgStacks} />
+          <Stat label="Current Streak" value={overall.currentStreak} />
+          <Stat label="Max Streak" value={overall.maxStreak} />
+        </div>
 
-            {/* Histogram */}
-            <div>
-              {Object.entries(overall.hist).map(([k, v]) => (
-                <Bar
-                  key={k}
-                  label={k}
-                  value={v}
-                  max={Math.max(...Object.values(overall.hist)) || 1}
-                />
-              ))}
-            </div>
+        {/* Histogram */}
+        <div>
+          {Object.entries(overall.hist).map(([k, v]) => (
+            <Bar
+              key={k}
+              label={k}
+              value={v}
+              max={Math.max(...Object.values(overall.hist)) || 1}
+            />
+          ))}
+        </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-between gap-3 pt-2">
-              <button
-                type="button"
-                onClick={onShare}
-                className="flex-1 h-10 rounded-xl bg-cyan-600 text-white font-semibold hover:bg-cyan-500"
-              >
-                Share
-              </button>
-              <button
-                type="button"
-                onClick={() => { closeResults(); goHome(); }}
-                className="flex-1 h-10 rounded-xl border border-emerald-300 text-emerald-900 bg-white/60"
-              >
-                Main
-              </button>
-            </div>
-          </div>
+        {/* Actions */}
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onShare}
+            className="flex-1 h-10 rounded-xl bg-cyan-600 text-white font-semibold hover:bg-cyan-500"
+          >
+            Share
+          </button>
+          <button
+            type="button"
+            onClick={() => { closeResults(); goHome(); }}
+            className="flex-1 h-10 rounded-xl border border-emerald-300 text-emerald-900 bg-white/60"
+          >
+            Main
+          </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 
