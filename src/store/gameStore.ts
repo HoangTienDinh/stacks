@@ -6,9 +6,18 @@ import { validateMove } from '@/game/validate'
 import { applyMove, replayUsedIndices } from '@/game/apply'
 import { signalError } from '@/utils/sound'
 import { BAG_SIZE } from '@/game/constants'
+import { useUIStore } from '@/store/uiStore'
+import { saveSession, loadSession, clearSession, SessionSnapshotV1 } from '@/persistence/session'
 
 type SlotMeta = { source: 'bag' | 'stack' | 'error' | null; bagIndex?: number; stackPos?: number }
 type Flight = { id: string; letter: string; from: { type: 'bag'; index: number } | { type: 'stack'; pos: number }; to: { slot: number } }
+type TimerState = {
+  running: boolean
+  startedAt: number | null
+  pausedAt: number | null
+  accumSec: number   // already-accumulated seconds
+}
+type RowRecord = { word: string; sources: ('stack'|'bag')[] }
 
 export type Actions = {
   loadToday: (dateKey?: string) => void
@@ -25,6 +34,14 @@ export type Actions = {
   setKeyboardOpen: (open: boolean) => void
   toggleKeyboard: () => void
   pickStackPos: (pos: number) => void
+    // timer and results
+  startTimer: () => void
+  pauseTimer: () => void
+  resumeTimer: () => void
+  resetTimer: () => void
+  // used by ResultModal navigation
+  closeResults: () => void
+  goHome: () => void
 }
 
 export type UIState = {
@@ -35,6 +52,10 @@ export type UIState = {
   reduceMotion: boolean
   flights: Flight[]
   keyboardOpen: boolean
+  undoCount: number
+  sessionRows: RowRecord[]      // rows for the current game (for sharing)
+  timer: TimerState
+  lastGame?: import('@/stats/stats').GameRecordV1
 }
 
 const firstEmpty = (s: string) => s.padEnd(5, ' ').slice(0,5).indexOf(' ')
@@ -62,7 +83,10 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
   startedAt: null,
   endedAt: null,
   keyboardOpen: false,
-
+  undoCount: 0,
+  sessionRows: [],
+  timer: { running:false, startedAt:null, pausedAt:null, accumSec:0 },
+  lastGame: undefined,
   candidate: '',
   error: null,
   slotMeta: Array.from({ length: 5 }, () => ({ source: null })),
@@ -75,6 +99,47 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
     const p = (puzzles as Record<string, Omit<DailyPuzzle, 'date'>>)[key] || (puzzles as any)[Object.keys(puzzles)[0]]
     const normalizedBag = normalizeBag12(p.bagList)
     const puzzle: DailyPuzzle = { date: key, wordOfDay: p.wordOfDay, bagList: normalizedBag }
+
+    // Try to hydrate an in-progress session for this date
+    const snap = loadSession();
+    const sameDate = snap?.dateKey === key;
+    const samePuzzle =
+      sameDate &&
+      snap!.puzzle.wordOfDay?.toUpperCase() === (p.wordOfDay || '').toUpperCase() &&
+      Array.isArray(snap!.puzzle.bagList) &&
+      snap!.puzzle.bagList.join('') === normalizedBag.join('');
+
+    if (samePuzzle) {
+      // Resume from snapshot
+      set({
+        puzzle,
+        currentStack: snap!.currentStack,
+        history: snap!.history || [],
+        usedIndices: new Set<number>(snap!.usedIndices || []),
+        bagCounts: snap!.bagCounts || {},
+        status: 'playing',
+        startedAt: null,
+        endedAt: null,
+        keyboardOpen: false,
+        undoCount: snap!.undoCount ?? 0,
+        sessionRows: [], // sessionRows are only for share after submit; we don't need past rows here
+        timer: snap!.timer || { running:false, startedAt:null, pausedAt:null, accumSec:0 },
+        lastGame: undefined,
+
+        candidate: snap!.candidate || '',
+        slotMeta: (snap!.slotMeta as any[]) || Array.from({ length: 5 }, () => ({ source: null })),
+        previewReserved: new Set<number>(snap!.previewReserved || []),
+
+        error: null,
+        flights: [],
+        reduceMotion: typeof window !== 'undefined'
+          ? window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
+          : false,
+      })
+      return
+    }
+
+    // Fresh start (no matching snapshot)
     const bagCounts = counts(normalizedBag.join(''))
     set({
       puzzle,
@@ -85,12 +150,20 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
       status: 'playing',
       startedAt: null,
       endedAt: null,
+      keyboardOpen: false,
+      undoCount: 0,
+      sessionRows: [],
+      timer: { running:false, startedAt:null, pausedAt:null, accumSec:0 },
+      lastGame: undefined,
 
       candidate: '',
       error: null,
       slotMeta: Array.from({ length: 5 }, () => ({ source: null })),
       previewReserved: new Set<number>(),
       flights: [],
+      reduceMotion: typeof window !== 'undefined'
+        ? window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
+        : false,
     })
   },
 
@@ -204,29 +277,98 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
     return { puzzle: { ...s.puzzle, bagList: newBagList }, usedIndices: newUsed, previewReserved: newPreview }
   }),
 
-  submit: () => {
+    // --- Timer controls ---
+  startTimer: () => set((s) => {
+    if (s.timer.running) return s
+    return { timer: { running:true, startedAt: Date.now(), pausedAt: null, accumSec: s.timer.accumSec } }
+  }),
+
+  pauseTimer: () => set((s) => {
+    if (!s.timer.running) return s
+    const now = Date.now()
+    const startedAt = s.timer.startedAt ?? now
+    const newAccum = s.timer.accumSec + Math.max(0, Math.floor((now - startedAt)/1000))
+    return { timer: { running:false, startedAt: null, pausedAt: now, accumSec: newAccum } }
+  }),
+
+  resumeTimer: () => set((s) => {
+    if (s.timer.running) return s
+    return { timer: { running:true, startedAt: Date.now(), pausedAt: null, accumSec: s.timer.accumSec } }
+  }),
+
+  resetTimer: () => set({ timer: { running:false, startedAt:null, pausedAt:null, accumSec:0 } }),
+
+  // --- Results helpers (close & go home) ---
+  closeResults: () => set({ status: 'playing' }),
+
+  goHome: () => {
+    try { useUIStore.getState().go('landing') } catch { /* no-op if UI store not available */ }
+  },
+
+  submit: async () => {
     const s = get()
     // must be 5 letters and no error slots
     if (s.candidate.length < 5 || s.slotMeta.some(m => m.source === 'error' || m.source === null)) {
       set({ error: 'Invalid letters in row' })
-      signalError()
+      import('@/utils/sound').then(m => m.signalError?.())
       setTimeout(() => set({ error: null }), 1200)
       return
     }
+
     const v = validateMove(s, s.candidate.toUpperCase())
     if (!('ok' in v) || !v.ok) {
       set({ error: v.reason })
-      signalError()
+      import('@/utils/sound').then(m => m.signalError?.())
       setTimeout(() => set({ error: null }), 1600)
       return
     }
-    const ns = applyMove(s, s.candidate.toUpperCase(), v.need, v.overlap)
+
+    // Record this row’s sources before we mutate state
+    const rowSources = s.slotMeta.map(m => (m.source === 'stack' ? 'stack' : 'bag')) as ('stack'|'bag')[]
+    const rowWord = s.candidate.toUpperCase()
+
+    const ns = applyMove(s, rowWord, v.need, v.overlap)
+
+    // Push this row into the session rows (for sharing)
+    const newRows = [...s.sessionRows, { word: rowWord, sources: rowSources }]
+
+    // Clear the typing row
     set({
       ...ns,
       candidate: '',
       slotMeta: Array.from({ length: 5 }, () => ({ source: null })),
       previewReserved: new Set<number>(),
+      sessionRows: newRows,
     })
+
+    // If the bag is empty => finalise game
+    // ✅ usedIndices is the single source of truth for "spent" tiles
+    const bagAllUsed = ns.usedIndices.size >= ns.puzzle.bagList.length;
+    if (bagAllUsed) {
+      const { saveGame } = await import('@/stats/stats');
+      const now = Date.now();
+      const timer = get().timer;
+      const dur = timer.running
+        ? timer.accumSec + Math.max(0, Math.floor((now - (timer.startedAt ?? now)) / 1000))
+        : timer.accumSec;
+
+      const record = {
+        dateKey: ns.puzzle.date,
+        finishedAt: now,
+        durationSec: dur,
+        stacksCleared: newRows.length,
+        undos: get().undoCount,
+        rows: newRows,
+      };
+
+      saveGame(record);
+      set({
+        status: 'cleared',           // ← keep in sync with ResultModal check
+        lastGame: record,
+        timer: { running:false, startedAt:null, pausedAt:null, accumSec: dur },
+      });
+      clearSession();
+    }
   },
 
   undo: () => set((state) => {
@@ -247,6 +389,7 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
       candidate: '',
       slotMeta: Array.from({ length: 5 }, () => ({ source: null })),
       previewReserved: new Set<number>(),
+      undoCount: state.undoCount + 1,
     }
   }),
 
@@ -264,6 +407,7 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
       currentStack,
       status: 'playing',
       endedAt: null,
+      undoCount: state.undoCount + 1,
       candidate: '',
       slotMeta: Array.from({ length: 5 }, () => ({ source: null })),
       previewReserved: new Set<number>(),
@@ -297,6 +441,40 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
   },
 
 }))
+
+// --- Auto-persist session snapshot (debounced) ---
+if (typeof window !== 'undefined') {
+  let t: number | undefined;
+
+  useGameStore.subscribe((s) => {
+    // Don't persist completed games
+    if (s.status === 'cleared' || !s.puzzle?.date || s.puzzle.date === '0000-00-00') {
+      return;
+    }
+    // Small debounce to avoid thrashing localStorage
+    window.clearTimeout(t);
+    t = window.setTimeout(() => {
+      const snap: SessionSnapshotV1 = {
+        version: 1,
+        dateKey: s.puzzle.date,
+        puzzle: { wordOfDay: s.puzzle.wordOfDay, bagList: s.puzzle.bagList },
+
+        history: s.history,
+        usedIndices: Array.from(s.usedIndices),
+        bagCounts: s.bagCounts,
+        currentStack: s.currentStack,
+
+        candidate: s.candidate,
+        slotMeta: s.slotMeta as any,
+        previewReserved: Array.from(s.previewReserved),
+
+        undoCount: s.undoCount,
+        timer: s.timer,
+      };
+      saveSession(snap);
+    }, 120);
+  });
+}
 
 function putAt(arr: string[], idx: number, ch: string) { const a = [...arr]; a[idx] = ch; return a }
 function cryptoId() { return Math.random().toString(36).slice(2, 10) }

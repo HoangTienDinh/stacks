@@ -32,7 +32,34 @@ export function GameScreen() {
     keyboardOpen: s.keyboardOpen,
   }))
 
-  useEffect(() => { loadToday(); loadDictionaries() }, [])
+  const { startTimer, pauseTimer, resumeTimer } = useGameStore(s => ({
+    startTimer: s.startTimer,
+    pauseTimer: s.pauseTimer,
+    resumeTimer: s.resumeTimer,
+  }))
+  // Start when mounted
+  useEffect(() => {
+    startTimer()
+    return () => pauseTimer() // pause when leaving GameScreen
+  }, [startTimer, pauseTimer])
+
+  // Pause/resume on tab visibility
+  useEffect(() => {
+    const onVis = () => { document.hidden ? pauseTimer() : resumeTimer() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [pauseTimer, resumeTimer])
+
+
+  // Only load if the store hasn't been initialised yet.
+  // (Prevents wiping progress when you leave and return to GameScreen.)
+  useEffect(() => {
+    if (!puzzle.date || puzzle.date === '0000-00-00') {
+      loadToday();
+    }
+    loadDictionaries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [puzzle.date]); // depends on puzzle.date so it runs once per day
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
