@@ -386,7 +386,8 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
       candidate: '',
       slotMeta: Array.from({ length: 5 }, () => ({ source: null })),
       previewReserved: new Set<number>(),
-      undoCount: state.undoCount + 1,
+      sessionRows: state.sessionRows.slice(0, Math.max(0, keep)),
+      undoCount: state.undoCount + 1
     }
   }),
 
@@ -404,10 +405,11 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
       currentStack,
       status: 'playing',
       endedAt: null,
-      undoCount: state.undoCount + 1,
       candidate: '',
       slotMeta: Array.from({ length: 5 }, () => ({ source: null })),
       previewReserved: new Set<number>(),
+      sessionRows: state.sessionRows.slice(0, keep),
+      undoCount: state.undoCount + 1,
     }
   }),
 
