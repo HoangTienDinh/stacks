@@ -116,7 +116,7 @@ export function ResultModal(props: ResultModalProps) {
 
         {/* Overall stats */}
         <div className="grid grid-cols-4 gap-2 text-center">
-          <Stat label="Games" value={overall.gamesPlayed} />
+          <Stat label="Games Played" value={overall.gamesPlayed} />
           <Stat label="Avg. Stacks" value={overall.avgStacks} />
           <Stat label="Current Streak" value={overall.currentStreak} />
           <Stat label="Max Streak" value={overall.maxStreak} />
