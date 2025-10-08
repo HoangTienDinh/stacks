@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { useGameStore } from '@/store/gameStore'
 import { BagGrid } from '@/components/BagGrid'
 import { CandidateRow } from '@/components/CandidateRow'
-import { ControlsBar } from '@/components/ControlsBar'
 import { ResultModal } from '@/components/ResultModal'
 import { Toast } from '@/components/Toast'
 import { loadDictionaries } from '@/game/dictionary'
@@ -11,6 +10,7 @@ import { FlightLayer } from '@/components/FlightLayer'
 import { MobileKeyboard } from '@/components/MobileKeyboard'
 import { BagCounts } from '@/components/BagCounts'
 import { BackHomeButton } from '@/components/BackHomeButton'
+import { InlineActions } from '@/components/InlineActions'
 
 export function GameScreen() {
   const {
@@ -37,10 +37,11 @@ export function GameScreen() {
     pauseTimer: s.pauseTimer,
     resumeTimer: s.resumeTimer,
   }))
-  // Start when mounted
+
+  // Start when mounted; pause when leaving
   useEffect(() => {
     startTimer()
-    return () => pauseTimer() // pause when leaving GameScreen
+    return () => pauseTimer()
   }, [startTimer, pauseTimer])
 
   // Pause/resume on tab visibility
@@ -50,17 +51,16 @@ export function GameScreen() {
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [pauseTimer, resumeTimer])
 
-
-  // Only load if the store hasn't been initialised yet.
-  // (Prevents wiping progress when you leave and return to GameScreen.)
+  // Only load once per day (prevents wiping progress when returning)
   useEffect(() => {
     if (!puzzle.date || puzzle.date === '0000-00-00') {
-      loadToday();
+      loadToday()
     }
-    loadDictionaries();
+    loadDictionaries()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [puzzle.date]); // depends on puzzle.date so it runs once per day
+  }, [puzzle.date])
 
+  // Keyboard handlers
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const k = e.key
@@ -70,7 +70,6 @@ export function GameScreen() {
         const full = candidate.length === 5
         const ok = full && slotMeta.every(m => m.source && m.source !== 'error')
         if (ok) { e.preventDefault(); submit() }
-        return
       }
     }
     window.addEventListener('keydown', onKey)
@@ -79,40 +78,50 @@ export function GameScreen() {
 
   const rollWords = [
     { index: 0, word: puzzle.wordOfDay || '' },
-    ...history.map((h, i) => ({ index: i+1, word: h.word })),
+    ...history.map((h, i) => ({ index: i + 1, word: h.word })),
     { index: history.length, word: currentStack || '' },
   ]
 
   return (
-    <div className="h-[100dvh] flex flex-col">
+    <div className="min-h-dvh w-full bg-white text-gray-900">
+      {/* back button (fixed) */}
       <BackHomeButton />
 
-      {/* Top: rolling stacks area (grows), centered */}
-      <div className="px-4 pt-4 flex-1 flex flex-col">
-        <RollColumn words={rollWords} onPick={pickStackPos} />
-        <div className="mt-4">
-          <CandidateRow />
-        </div>
+      {/* Centered column. When there’s extra space, the stack sits roughly mid-screen.
+         If content grows, it naturally flows top→bottom and can scroll. */}
+      <div
+        className="mx-auto w-full max-w-[680px] px-4"
+        style={{
+          paddingBottom: keyboardOpen
+            ? 'calc(env(safe-area-inset-bottom, 0px) + 300px)'
+            : '2.5rem',
+        }}
+      >
+        {/* Use a flex column; my-auto centers vertically when there’s slack space */}
+        <div className="min-h-dvh flex flex-col">
+          <div className="my-auto pt-6 pb-4">
+            {/* 1) Submitted stacks + current stack */}
+            <div className="mb-3">
+              <RollColumn words={rollWords} onPick={pickStackPos} />
+            </div>
 
-        {/* Bag or Counts (no scrolling; keep everything visible) */}
-        {/* <div className={keyboardOpen ? 'pt-2 pb-48' : 'pt-2 pb-28'}>
-          {keyboardOpen ? <BagCounts /> : <BagGrid />}
-        </div> */}
-        <div
-          className="pt-2"
-          style={{
-            // When keyboard is open, reserve ~300px + safe-area so nothing overlaps
-            paddingBottom: keyboardOpen
-              ? 'calc(env(safe-area-inset-bottom, 0px) + 300px)'
-              : '7rem' // ≈ pb-28
-          }}
-        >
-          {keyboardOpen ? <BagCounts /> : <BagGrid />}
+            {/* 2) Candidate row */}
+            <div className="mb-4">
+              <CandidateRow />
+            </div>
+
+            {/* 3) Bag (or counts when keyboard is open) */}
+            <div className="mb-3">
+              {keyboardOpen ? <BagCounts /> : <BagGrid />}
+            </div>
+
+            {/* 4) Inline actions directly under the bag */}
+            <InlineActions />
+          </div>
         </div>
       </div>
 
-      {/* Footer + mobile keyboard overlay */}
-      <ControlsBar />
+      {/* Overlays */}
       <MobileKeyboard />
       <ResultModal />
       {error && <Toast message={error} />}
