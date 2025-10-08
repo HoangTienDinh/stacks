@@ -74,7 +74,7 @@ export function makeShare(rec: GameRecordV1) {
   const body = rec.rows.map(r =>
     r.sources.map(s => (s === 'stack' ? '🟦' : '🟩')).join('')
   ).join('\n');
-  const footer = `Can you beat my score?\nhttps://github.com/HoangTienDinh/stacks`;
+  const footer = `Can you beat my score?\nhttps://hoangtiendinh.github.io/stacks/`;
   return `${header}\n${body}\n${footer}`;
 }
 
