@@ -3,8 +3,7 @@ import clsx from 'clsx'
 type TileProps = {
   letter: string
   muted?: boolean
-  /** visual context. "bag" = soft green for unused bag tiles */
-  intent?: 'default' | 'bag' | 'error'
+  intent?: 'default' | 'bag' | 'error' | 'stack'
   className?: string
 }
 
@@ -22,9 +21,11 @@ export function Tile({
     ? 'bg-gray-50 border-gray-200 text-gray-400'
     : intent === 'bag'
       ? 'bg-emerald-50 border-emerald-300 text-slate-900 hover:bg-emerald-100'
-      : intent === 'error'
-        ? 'bg-red-50 border-red-300 text-slate-900'
-        : 'bg-white border-gray-300 text-slate-900 hover:bg-gray-100'
+      : intent === 'stack'
+        ? 'bg-cyan-50 border-cyan-300 text-slate-900 hover:bg-cyan-100'
+        : intent === 'error'
+          ? 'bg-red-50 border-red-300 text-slate-900'
+          : 'bg-white border-gray-300 text-slate-900 hover:bg-gray-100'
 
   return (
     <div className={clsx(base, tone, className)} aria-hidden>

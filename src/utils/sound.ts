@@ -29,3 +29,26 @@ export function signalError() {
   vibrate(20)
   playErrorTone()
 }
+
+function ac() { return ctx ?? (ctx = new (window.AudioContext || (window as any).webkitAudioContext)()) }
+
+function beep(freq: number, dur = 0.08, gain = 0.04) {
+  const a = ac()
+  const o = a.createOscillator()
+  const g = a.createGain()
+  o.frequency.value = freq
+  o.type = 'sine'
+  g.gain.value = gain
+  o.connect(g).connect(a.destination)
+  o.start()
+  o.stop(a.currentTime + dur)
+}
+
+export function signalBag() {
+  beep(520, 0.06, 0.04)
+}
+
+export function signalSnap() {
+  beep(680, 0.05, 0.04)
+  if (navigator.vibrate) navigator.vibrate(8)
+}
