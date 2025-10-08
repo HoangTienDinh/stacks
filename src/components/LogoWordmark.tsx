@@ -1,31 +1,26 @@
-import clsx from 'clsx'
 import { Tile } from '@/components/Tile'
+import clsx from 'clsx'
 
-/**
- * Alternates "stack" (cyan) and "bag" (emerald) tile colors,
- * and scales responsively so six tiles always fit on mobile.
- */
-export function LogoWordmark({ letters = 'STACKS' }: { letters?: string }) {
+type Props = {
+  letters?: string
+  className?: string
+}
+
+/** Alternates cyan/emerald tiles and scales responsively. */
+export function LogoWordmark({ letters = 'STACKS', className }: Props) {
   const chars = letters.split('')
 
   return (
-    <div className="flex items-center justify-center gap-2 sm:gap-3">
-      {chars.map((ch, i) => {
-        const isStack = i % 2 === 0 // even = cyan, odd = green
-        return (
-          <Tile
-            key={`${ch}-${i}`}
-            letter={ch}
-            className={clsx(
-              // responsive square + responsive type
-              'w-[clamp(44px,12vw,72px)] h-[clamp(44px,12vw,72px)]',
-              'text-[clamp(18px,5vw,32px)] rounded-2xl shadow-sm',
-              // colorways (override Tile’s default bg/border)
-              isStack ? 'bg-cyan-50 border-cyan-300' : 'bg-emerald-50 border-emerald-300'
-            )}
-          />
-        )
-      })}
+    <div className={clsx('flex items-center justify-center gap-2 sm:gap-3', className)}>
+      {chars.map((ch, i) => (
+        <Tile
+          key={`${ch}-${i}`}
+          letter={ch}
+          intent={i % 2 === 0 ? 'stack' : 'bag'}
+          className="w-[clamp(52px,14vw,80px)] h-[clamp(52px,14vw,80px)]
+                     text-[clamp(20px,5.5vw,34px)]"
+        />
+      ))}
     </div>
   )
 }
