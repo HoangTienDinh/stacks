@@ -54,29 +54,40 @@ export default function ViewPuzzleScreen() {
         <div className="min-h-dvh flex flex-col">
           <div className="my-auto pt-4 pb-6">
             {/* Rows */}
-            <div className="space-y-2 sm:space-y-2.5">
+            <div className="space-y-[clamp(8px,2vw,12px)]">
               {playedRows.map(({ index, word, sources }) => (
-                <div key={`${index}-${word}`} className="flex justify-center">
-                  <div className="relative flex gap-[clamp(6px,1.5vw,10px)]">
-                    {/* index anchored to the tile row */}
-                    <span className="absolute -left-6 sm:-left-9 top-1/2 -translate-y-1/2 w-6 text-right text-xs text-gray-500 tabular-nums">
-                      {index}
-                    </span>
+                <div key={`${index}-${word}`} className="relative w-fit mx-auto">
+                  <span
+                    className="
+                      absolute top-1/2 -translate-y-1/2
+                      w-[clamp(18px,4.8vw,30px)] text-right
+                      -left-[clamp(22px,5.5vw,40px)]
+                      text-[clamp(10px,2.7vw,12px)] text-gray-500 tabular-nums
+                    "
+                  >
+                    {index}
+                  </span>
 
+                  {/* Centered tiles */}
+                  <div className="flex gap-[clamp(6px,1.5vw,10px)]">
                     {word.split('').map((ch, i) => (
                       <Tile
                         key={i}
                         letter={ch}
                         intent={sources[i] === 'stack' ? 'stack' : 'bag'}
-                        className="rounded-2xl shadow-sm
-                                   w-[clamp(34px,9vw,48px)] h-[clamp(34px,9vw,48px)]
-                                   text-[clamp(16px,4.2vw,22px)]"
+                        className="
+                          rounded-2xl shadow-sm
+                          w-[clamp(34px,9vw,48px)] h-[clamp(34px,9vw,48px)]
+                          text-[clamp(16px,4.2vw,22px)]
+                        "
                       />
                     ))}
                   </div>
                 </div>
               ))}
             </div>
+
+
 
             {/* Bag */}
             <div className="mt-4 sm:mt-5">
