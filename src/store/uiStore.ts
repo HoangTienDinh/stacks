@@ -1,13 +1,13 @@
 import { create } from 'zustand'
 
-type View = 'landing' | 'game'
+type UIScreen = 'landing' | 'game' | 'view'
 
 type UIState = {
-  view: View
-  go: (v: View) => void
+  screen: UIScreen
+  go: (s: UIScreen) => void
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  view: 'landing',              // ← default to Landing
-  go: (v) => set({ view: v }),
+  screen: 'landing',
+  go: (s) => set({ screen: s }),
 }))

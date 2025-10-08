@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { LogoWordmark } from '@/components/LogoWordmark'
 import { HelpModal } from '@/components/HelpModal'
+import { hasRecord, todayKey } from '@/stats/stats'
 
 export default function LandingScreen() {
   const go = useUIStore(s => s.go)
@@ -14,6 +15,7 @@ export default function LandingScreen() {
   }, [])
 
   const puzzleNo = 'No. 0001' // placeholder
+  const finishedToday = hasRecord(todayKey())
 
   return (
     <div className="h-[100dvh] w-full overflow-hidden bg-white text-slate-900 flex flex-col">
@@ -31,15 +33,27 @@ export default function LandingScreen() {
 
           {/* CTA stack — slimmer so the logo can dominate */}
           <div className="w-full flex flex-col items-center gap-3 mt-1">
-            <button
-              type="button"
-              onClick={() => go('game')}
-              className="w-[min(62vw,180px)] h-[clamp(40px,6.5vh,44px)] rounded-full 
-                         bg-emerald-600 text-white font-semibold shadow-sm
-                         hover:bg-emerald-500 active:translate-y-[1px] transition"
-            >
-              Play
-            </button>
+            {finishedToday ? (
+              <button
+                type="button"
+                onClick={() => go('view')}
+                className="w-[min(60vw,180px)] h-[clamp(44px,6vh,40px)] rounded-full 
+                          bg-cyan-700 text-white font-semibold shadow-sm
+                          hover:bg-cyan-600 active:translate-y-[1px] transition"
+              >
+                View Puzzle
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => go('game')}
+                className="w-[min(60vw,180px)] h-[clamp(44px,6vh,40px)] rounded-full 
+                          bg-emerald-600 text-white font-semibold shadow-sm
+                          hover:bg-emerald-500 active:translate-y-[1px] transition"
+              >
+                Play
+              </button>
+            )}
 
             <button
               type="button"

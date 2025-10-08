@@ -74,3 +74,18 @@ export function makeShare(rec: GameRecordV1) {
   const footer = `Can you beat my score?\nhttps://github.com/HoangTienDinh/stacks`;
   return `${header}\n${body}\n${footer}`;
 }
+
+// --- helpers for Landing / View Puzzle ---
+export function todayKey(): string {
+  // Must match gameStore's loadToday default
+  return new Date().toISOString().slice(0,10);
+}
+
+export function getRecordByDate(dateKey: string): GameRecordV1 | null {
+  const all = loadGames();
+  return all.find(g => g.dateKey === dateKey) || null;
+}
+
+export function hasRecord(dateKey: string): boolean {
+  return !!getRecordByDate(dateKey);
+}
