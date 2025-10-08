@@ -60,8 +60,8 @@ export default function LandingScreen() {
               type="button"
               onClick={() => setHelpOpen(true)}
               className="w-[min(62vw,180px)] h-[clamp(40px,6.5vh,44px)] rounded-full 
-                         bg-cyan-600 text-white font-semibold shadow-sm
-                         hover:bg-cyan-500 active:translate-y-[1px] transition"
+                         border border-emerald-300 text-emerald-900 bg-white/60
+                         hover:bg-white transition"
             >
               How To Play
             </button>
