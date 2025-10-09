@@ -1,4 +1,3 @@
-// src/components/BagGrid.tsx
 import clsx from 'clsx'
 import { useGameStore } from '@/store/gameStore'
 import { Tile } from './Tile'
@@ -32,17 +31,19 @@ export function BagGrid() {
               type="button"
               onClick={() => !muted && pushBagIndex(i)}
               disabled={muted}
-              className={clsx(
-                'rounded-xl',
-                isPosHint && 'ring-2 ring-cyan-300 ring-offset-1'
-              )}
+              className="rounded-xl"
               aria-label={`Bag tile ${ch}${used ? ', used' : reserved ? ', in use' : isPosHint ? ', positional match' : ', available'}`}
+              title={isPosHint ? 'Positional match — use this tile' : undefined}
             >
               <Tile
                 letter={ch}
                 muted={muted}
                 intent="bag"
-                className="w-16 h-16 text-2xl sm:w-20 sm:h-20 sm:text-3xl"
+                emphasis={isPosHint}
+                className={clsx(
+                  'w-16 h-16 text-2xl sm:w-20 sm:h-20 sm:text-3xl',
+                  isPosHint && '!bg-cyan-50 !border-cyan-600'
+                )}
               />
             </button>
           )

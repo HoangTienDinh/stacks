@@ -6,6 +6,7 @@ type TileProps = {
   /** visual context. "bag" = soft green for unused bag tiles */
   intent?: 'default' | 'bag' | 'stack' | 'error'
   className?: string
+  emphasis?: boolean
 }
 
 export function Tile({
@@ -13,10 +14,14 @@ export function Tile({
   muted = false,
   intent = 'default',
   className,
+  emphasis = false,
 }: TileProps) {
-  const base =
-    'inline-flex h-16 w-16 items-center justify-center rounded-2xl ' +
-    'border text-2xl font-semibold select-none shadow-sm transition'
+  const base = clsx(
+    'inline-flex h-16 w-16 items-center justify-center rounded-2xl',
+    'text-2xl font-semibold select-none shadow-sm transition',
+    'border',
+    emphasis && 'border-4'
+  )
 
   const tone = muted
     ? 'bg-gray-50 border-gray-200 text-gray-400'
