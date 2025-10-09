@@ -116,7 +116,7 @@ export function GameScreen() {
             </div>
 
             {/* 4) Inline actions directly under the bag */}
-            <InlineActions />
+            {!keyboardOpen && <InlineActions />}
           </div>
         </div>
       </div>

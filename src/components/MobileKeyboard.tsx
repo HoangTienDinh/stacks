@@ -33,11 +33,14 @@ export function MobileKeyboard() {
 
   const canSubmit = candidate.length === 5 && slotMeta.every(m => m.source && m.source !== 'error')
 
-  const Key = ({ ch }: { ch: string }) => (
+  const Key = ({ ch, className = '' }: { ch: string; className?: string }) => (
     <button
       type="button"
       onClick={() => typeLetter(ch)}
-      className="h-10 min-w-[2.2rem] rounded-lg border bg-gray-50 px-2 text-sm font-medium shadow-sm active:bg-gray-100"
+      className={
+        'h-11 rounded-lg border bg-gray-50 text-[15px] font-medium shadow-sm active:bg-gray-100 ' +
+        'w-full ' + className
+      }
     >
       {ch}
     </button>
@@ -45,55 +48,60 @@ export function MobileKeyboard() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 sm:hidden">
-      <div className="mx-auto max-w-md rounded-t-2xl border bg-white p-3 shadow-2xl">
-        {/* Row 1 */}
-        <div className="mb-2 flex justify-center gap-1">
-          {TOP.split('').map(ch => <Key key={ch} ch={ch} />)}
-        </div>
+      {/* Panel is fully constrained to viewport width and safe area */}
+      <div className="pointer-events-auto mx-auto w-full max-w-[680px] px-3">
+        <div className="rounded-t-2xl border bg-white p-3 shadow-2xl
+                        pb-[max(env(safe-area-inset-bottom),8px)]">
+          {/* Row 1: 10 equally-sized keys */}
+          <div className="grid grid-cols-10 gap-1 mb-2">
+            {TOP.split('').map(ch => <Key key={ch} ch={ch} />)}
+          </div>
 
-        {/* Row 2 with Backspace at the far right (i.e., directly above Enter) */}
-        <div className="mb-2 flex justify-center gap-1">
-          {MID.split('').map(ch => <Key key={ch} ch={ch} />)}
-          <button
-            type="button"
-            onClick={popLetter}
-            aria-label="Backspace"
-            className="h-10 min-w-[2.6rem] rounded-lg border bg-gray-50 px-2 text-sm font-medium shadow-sm active:bg-gray-100"
-          >
-            ⌫
-          </button>
-        </div>
+          {/* Row 2: letters + Backspace (backspace gets 2 columns so it's easy to hit) */}
+          <div className="grid grid-cols-11 gap-1 mb-2">
+            {MID.split('').map(ch => <Key key={ch} ch={ch} />)}
+            <button
+              type="button"
+              onClick={popLetter}
+              aria-label="Backspace"
+              className="h-11 col-span-2 rounded-lg border bg-gray-50 text-[15px] font-medium shadow-sm active:bg-gray-100"
+            >
+              ⌫
+            </button>
+          </div>
 
-        {/* Row 3 with Enter at bottom-right */}
-        <div className="mb-2 flex justify-center gap-1">
-          {LOW.split('').map(ch => <Key key={ch} ch={ch} />)}
-          <button
-            type="button"
-            onClick={() => canSubmit && submit()}
-            disabled={!canSubmit}
-            className="h-10 min-w-[3.6rem] rounded-lg border bg-violet-600 px-3 text-sm font-semibold text-white shadow-sm disabled:opacity-40"
-          >
-            Enter
-          </button>
-        </div>
+          {/* Row 3: letters + Enter (Enter is wider) */}
+          <div className="grid grid-cols-9 gap-1 mb-2">
+            {LOW.split('').map(ch => <Key key={ch} ch={ch} />)}
+            <button
+              type="button"
+              onClick={() => canSubmit && submit()}
+              disabled={!canSubmit}
+              className="h-11 col-span-2 rounded-lg border px-3 text-[15px] font-semibold shadow-sm
+                         disabled:opacity-40 bg-violet-600 text-white"
+            >
+              Enter
+            </button>
+          </div>
 
-        {/* Footer inside sheet: Close + Shuffle */}
-        <div className="mt-1 flex items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => setKeyboardOpen(false)}
-            className="text-sm text-gray-700 underline"
-          >
-            Close
-          </button>
-          <button
-            type="button"
-            onClick={shuffleBag}
-            className="rounded-lg border bg-white px-3 h-9 text-sm font-medium shadow-sm"
-            aria-label="Shuffle bag letters"
-          >
-            Shuffle
-          </button>
+          {/* Footer inside sheet: Close + Shuffle (wrap if tight) */}
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setKeyboardOpen(false)}
+              className="text-sm text-gray-700 underline"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              onClick={shuffleBag}
+              className="h-9 rounded-lg border bg-white px-3 text-sm font-medium shadow-sm"
+              aria-label="Shuffle bag letters"
+            >
+              Shuffle
+            </button>
+          </div>
         </div>
       </div>
     </div>
