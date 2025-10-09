@@ -1,51 +1,93 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light; }
+:root {
+  color-scheme: light;
+}
 
-.tile { @apply inline-flex items-center justify-center rounded-tile border border-gray-300 shadow-tile bg-white text-gray-900 font-bold select-none; }
-.tile-muted { @apply opacity-30; }
-.tile-lg { @apply w-16 h-16 text-2xl sm:w-20 sm:h-20 sm:text-3xl; }
-.tile:hover { @apply shadow-md; }
-button:disabled .tile { @apply opacity-30; }
+.tile {
+  @apply inline-flex select-none items-center justify-center rounded-tile border border-gray-300 bg-white font-bold text-gray-900 shadow-tile;
+}
+.tile-muted {
+  @apply opacity-30;
+}
+.tile-lg {
+  @apply h-16 w-16 text-2xl sm:h-20 sm:w-20 sm:text-3xl;
+}
+.tile:hover {
+  @apply shadow-md;
+}
+button:disabled .tile {
+  @apply opacity-30;
+}
 
-.bag-grid { @apply grid grid-cols-5 gap-3 sm:gap-4; }
+.bag-grid {
+  @apply grid grid-cols-5 gap-3 sm:gap-4;
+}
 
 /* Footer buttons */
 .btn {
-  @apply inline-flex items-center justify-center rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 font-medium shadow-sm active:translate-y-[1px];
+  @apply inline-flex items-center justify-center rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 font-medium text-gray-900 shadow-sm active:translate-y-[1px];
 }
-.btn-primary { @apply bg-brand-500 text-white border-brand-500; }
+.btn-primary {
+  @apply border-brand-500 bg-brand-500 text-white;
+}
 
-.modal-backdrop { @apply fixed inset-0 bg-black/40 flex items-center justify-center p-4; }
-.modal-card { @apply bg-white rounded-2xl p-6 w-full max-w-sm; }
+.modal-backdrop {
+  @apply fixed inset-0 flex items-center justify-center bg-black/40 p-4;
+}
+.modal-card {
+  @apply w-full max-w-sm rounded-2xl bg-white p-6;
+}
 
 /* Error state: soft red bg + shake */
 .tile-error {
-  @apply bg-red-50 border-red-300 ring-2 ring-red-400 ring-offset-2 ring-offset-white;
+  @apply border-red-300 bg-red-50 ring-2 ring-red-400 ring-offset-2 ring-offset-white;
   animation: tile-shake 160ms ease-in-out;
 }
 
 @keyframes tile-shake {
-  0%   { transform: translateX(0) }
-  20%  { transform: translateX(-3px) }
-  40%  { transform: translateX(3px) }
-  60%  { transform: translateX(-2px) }
-  80%  { transform: translateX(2px) }
-  100% { transform: translateX(0) }
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-3px);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 /* from-stack hint (unchanged) */
-.tile-from-stack { @apply bg-cyan-50 border-cyan-300; }
+.tile-from-stack {
+  @apply border-cyan-300 bg-cyan-50;
+}
 
 /* from-bag hint: soft green */
-.tile-from-bag { @apply bg-emerald-50 border-emerald-300; }
+.tile-from-bag {
+  @apply border-emerald-300 bg-emerald-50;
+}
 
 /* Full-height app, no page scroll */
-html, body, #root { height: 100%; }
-body { overflow: hidden; overscroll-behavior: contain; }
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
 
 .focus-ring:focus-visible {
   outline: none;

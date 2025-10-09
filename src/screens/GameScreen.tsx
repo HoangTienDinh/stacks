@@ -14,10 +14,20 @@ import { InlineActions } from '@/components/InlineActions'
 
 export function GameScreen() {
   const {
-    loadToday, error, puzzle, history, currentStack,
-    typeLetter, popLetter, submit, candidate, slotMeta, pickStackPos,
-    keyboardOpen, timer,
-  } = useGameStore(s => ({
+    loadToday,
+    error,
+    puzzle,
+    history,
+    currentStack,
+    typeLetter,
+    popLetter,
+    submit,
+    candidate,
+    slotMeta,
+    pickStackPos,
+    keyboardOpen,
+    timer,
+  } = useGameStore((s) => ({
     loadToday: s.loadToday,
     error: s.error,
     puzzle: s.puzzle,
@@ -33,7 +43,7 @@ export function GameScreen() {
     timer: s.timer,
   }))
 
-  const { pauseTimer, resumeTimer } = useGameStore(s => ({
+  const { pauseTimer, resumeTimer } = useGameStore((s) => ({
     pauseTimer: s.pauseTimer,
     resumeTimer: s.resumeTimer,
   }))
@@ -56,7 +66,9 @@ export function GameScreen() {
 
   // Always pause on unmount (leaving GameScreen)
   useEffect(() => {
-    return () => { pauseTimer() }
+    return () => {
+      pauseTimer()
+    }
   }, [pauseTimer])
 
   // Pause while backgrounded; resume on focus
@@ -96,7 +108,7 @@ export function GameScreen() {
 
       if (k === 'Enter') {
         const full = candidate.length === 5
-        const ok = full && slotMeta.every(m => m.source && m.source !== 'error')
+        const ok = full && slotMeta.every((m) => m.source && m.source !== 'error')
         if (ok) {
           e.preventDefault()
           submit()
@@ -121,13 +133,11 @@ export function GameScreen() {
       <div
         className="mx-auto w-full max-w-[680px] px-4"
         style={{
-          paddingBottom: keyboardOpen
-            ? 'calc(env(safe-area-inset-bottom, 0px) + 300px)'
-            : '2.5rem',
+          paddingBottom: keyboardOpen ? 'calc(env(safe-area-inset-bottom, 0px) + 300px)' : '2.5rem',
         }}
       >
-        <div className="min-h-dvh flex flex-col">
-          <div className="my-auto pt-6 pb-4">
+        <div className="flex min-h-dvh flex-col">
+          <div className="my-auto pb-4 pt-6">
             {/* Stacks timeline + current stack */}
             <div className="mb-3">
               <RollColumn words={rollWords} onPick={pickStackPos} />
@@ -139,9 +149,7 @@ export function GameScreen() {
             </div>
 
             {/* Bag (or counts when mobile keyboard is open) */}
-            <div className="mb-3">
-              {keyboardOpen ? <BagCounts /> : <BagGrid />}
-            </div>
+            <div className="mb-3">{keyboardOpen ? <BagCounts /> : <BagGrid />}</div>
 
             {/* Inline actions under bag (hidden when keyboard sheet is open) */}
             {!keyboardOpen && <InlineActions />}

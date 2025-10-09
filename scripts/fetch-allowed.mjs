@@ -10,8 +10,8 @@ import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const OUT_PATH        = path.resolve(__dirname, '../src/assets/allowed5.txt')
-const BANNED_PATH     = path.resolve(__dirname, '../src/assets/banned5.txt')
+const OUT_PATH = path.resolve(__dirname, '../src/assets/allowed5.txt')
+const BANNED_PATH = path.resolve(__dirname, '../src/assets/banned5.txt')
 const LOCAL_FALLBACKS = [
   path.resolve(__dirname, '../src/assets/allowed5-starter.txt'), // optional
 ]
@@ -24,8 +24,8 @@ const SOURCES = [
   'https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt',
 ]
 
-const onlyFiveAZ = s => /^[A-Z]{5}$/.test(s)
-const up = s => s.trim().toUpperCase()
+const onlyFiveAZ = (s) => /^[A-Z]{5}$/.test(s)
+const up = (s) => s.trim().toUpperCase()
 
 async function fetchText(url) {
   const res = await fetch(url, { cache: 'no-store' })
@@ -34,7 +34,11 @@ async function fetchText(url) {
 }
 
 async function readIfExists(p) {
-  try { return await fs.readFile(p, 'utf8') } catch { return '' }
+  try {
+    return await fs.readFile(p, 'utf8')
+  } catch {
+    return ''
+  }
 }
 
 async function main() {
@@ -48,7 +52,10 @@ async function main() {
       let add = 0
       for (const line of txt.split(/\r?\n/)) {
         const w = up(line)
-        if (onlyFiveAZ(w)) { pool.add(w); add++ }
+        if (onlyFiveAZ(w)) {
+          pool.add(w)
+          add++
+        }
       }
       console.log(`✔ Fetched ${url} (+${add})`)
     } catch (e) {
@@ -63,7 +70,10 @@ async function main() {
     let add = 0
     for (const line of txt.split(/\r?\n/)) {
       const w = up(line)
-      if (onlyFiveAZ(w)) { pool.add(w); add++ }
+      if (onlyFiveAZ(w)) {
+        pool.add(w)
+        add++
+      }
     }
     console.log(`✔ Merged local fallback ${path.basename(p)} (+${add})`)
   }
@@ -83,7 +93,9 @@ async function main() {
 
   const words = Array.from(pool).sort()
   if (words.length < 3000) {
-    console.warn(`⚠ Result size is small (${words.length}). Consider adding another source or a bigger local fallback.`)
+    console.warn(
+      `⚠ Result size is small (${words.length}). Consider adding another source or a bigger local fallback.`
+    )
   }
 
   await fs.mkdir(path.dirname(OUT_PATH), { recursive: true })
@@ -91,7 +103,7 @@ async function main() {
   console.log(`✅ Wrote ${OUT_PATH} (${words.length} words)`)
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err)
   process.exit(1)
 })

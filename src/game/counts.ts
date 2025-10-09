@@ -1,4 +1,3 @@
-
 export const counts = (s: string): Record<string, number> => {
   const m: Record<string, number> = {}
   for (const ch of s.toUpperCase()) m[ch] = (m[ch] || 0) + 1

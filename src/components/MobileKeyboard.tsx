@@ -7,9 +7,15 @@ const LOW = 'ZXCVBNM'
 
 export function MobileKeyboard() {
   const {
-    keyboardOpen, setKeyboardOpen, typeLetter, popLetter, submit,
-    candidate, slotMeta, shuffleBag,
-  } = useGameStore(s => ({
+    keyboardOpen,
+    setKeyboardOpen,
+    typeLetter,
+    popLetter,
+    submit,
+    candidate,
+    slotMeta,
+    shuffleBag,
+  } = useGameStore((s) => ({
     keyboardOpen: s.keyboardOpen,
     setKeyboardOpen: s.setKeyboardOpen,
     typeLetter: s.typeLetter,
@@ -31,7 +37,8 @@ export function MobileKeyboard() {
 
   if (!isTouch || !keyboardOpen) return null
 
-  const canSubmit = candidate.length === 5 && slotMeta.every(m => m.source && m.source !== 'error')
+  const canSubmit =
+    candidate.length === 5 && slotMeta.every((m) => m.source && m.source !== 'error')
 
   const Key = ({ ch, className = '' }: { ch: string; className?: string }) => (
     <button
@@ -39,7 +46,8 @@ export function MobileKeyboard() {
       onClick={() => typeLetter(ch)}
       className={
         'h-11 rounded-lg border bg-gray-50 text-[15px] font-medium shadow-sm active:bg-gray-100 ' +
-        'w-full ' + className
+        'w-full' +
+        className
       }
     >
       {ch}
@@ -50,35 +58,39 @@ export function MobileKeyboard() {
     <div className="fixed inset-x-0 bottom-0 z-40 sm:hidden">
       {/* Panel is fully constrained to viewport width and safe area */}
       <div className="pointer-events-auto mx-auto w-full max-w-[680px] px-3">
-        <div className="rounded-t-2xl border bg-white p-3 shadow-2xl
-                        pb-[max(env(safe-area-inset-bottom),8px)]">
+        <div className="rounded-t-2xl border bg-white p-3 pb-[max(env(safe-area-inset-bottom),8px)] shadow-2xl">
           {/* Row 1: 10 equally-sized keys */}
-          <div className="grid grid-cols-10 gap-1 mb-2">
-            {TOP.split('').map(ch => <Key key={ch} ch={ch} />)}
+          <div className="mb-2 grid grid-cols-10 gap-1">
+            {TOP.split('').map((ch) => (
+              <Key key={ch} ch={ch} />
+            ))}
           </div>
 
           {/* Row 2: letters + Backspace (backspace gets 2 columns so it's easy to hit) */}
-          <div className="grid grid-cols-11 gap-1 mb-2">
-            {MID.split('').map(ch => <Key key={ch} ch={ch} />)}
+          <div className="mb-2 grid grid-cols-11 gap-1">
+            {MID.split('').map((ch) => (
+              <Key key={ch} ch={ch} />
+            ))}
             <button
               type="button"
               onClick={popLetter}
               aria-label="Backspace"
-              className="h-11 col-span-2 rounded-lg border bg-gray-50 text-[15px] font-medium shadow-sm active:bg-gray-100"
+              className="col-span-2 h-11 rounded-lg border bg-gray-50 text-[15px] font-medium shadow-sm active:bg-gray-100"
             >
               ⌫
             </button>
           </div>
 
           {/* Row 3: letters + Enter (Enter is wider) */}
-          <div className="grid grid-cols-9 gap-1 mb-2">
-            {LOW.split('').map(ch => <Key key={ch} ch={ch} />)}
+          <div className="mb-2 grid grid-cols-9 gap-1">
+            {LOW.split('').map((ch) => (
+              <Key key={ch} ch={ch} />
+            ))}
             <button
               type="button"
               onClick={() => canSubmit && submit()}
               disabled={!canSubmit}
-              className="h-11 col-span-2 rounded-lg border px-3 text-[15px] font-semibold shadow-sm
-                         disabled:opacity-40 bg-violet-600 text-white"
+              className="col-span-2 h-11 rounded-lg border bg-violet-600 px-3 text-[15px] font-semibold text-white shadow-sm disabled:opacity-40"
             >
               Enter
             </button>

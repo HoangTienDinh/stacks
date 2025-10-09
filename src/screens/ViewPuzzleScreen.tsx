@@ -3,22 +3,20 @@ import { useUIStore } from '@/store/uiStore'
 import { useGameStore } from '@/store/gameStore'
 import { BackHomeButton } from '@/components/BackHomeButton'
 import { Tile } from '@/components/Tile'
-import {
-  formatClock,
-  getRecordByDate,
-  makeShare,
-  todayKey,
-  type LetterSource,
-} from '@/stats/stats'
+import { formatClock, getRecordByDate, makeShare, todayKey, type LetterSource } from '@/stats/stats'
 
 export default function ViewPuzzleScreen() {
-  const go = useUIStore(s => s.go)
-  const { puzzle, loadToday } = useGameStore(s => ({ puzzle: s.puzzle, loadToday: s.loadToday }))
+  const go = useUIStore((s) => s.go)
+  const { puzzle, loadToday } = useGameStore((s) => ({ puzzle: s.puzzle, loadToday: s.loadToday }))
 
-  useEffect(() => { loadToday() }, [loadToday])
+  useEffect(() => {
+    loadToday()
+  }, [loadToday])
 
   const record = useMemo(() => getRecordByDate(todayKey()), [])
-  useEffect(() => { if (!record) go('landing') }, [record, go])
+  useEffect(() => {
+    if (!record) go('landing')
+  }, [record, go])
   if (!record) return null
 
   const inferSources = (prev: string, curr: string): LetterSource[] =>
@@ -27,13 +25,14 @@ export default function ViewPuzzleScreen() {
   const playedRows = (() => {
     const rows: { index: number; word: string; sources: LetterSource[] }[] = []
     const start = (puzzle.wordOfDay || '').toUpperCase()
-    if (start) rows.push({ index: 0, word: start, sources: Array(5).fill('stack') as LetterSource[] })
+    if (start)
+      rows.push({ index: 0, word: start, sources: Array(5).fill('stack') as LetterSource[] })
     let prev = start
     for (let i = 0; i < record.rows.length; i++) {
       const w = record.rows[i].word.toUpperCase()
-      const srcs = (record.rows[i].sources?.length === 5
-        ? record.rows[i].sources
-        : inferSources(prev, w)) as LetterSource[]
+      const srcs = (
+        record.rows[i].sources?.length === 5 ? record.rows[i].sources : inferSources(prev, w)
+      ) as LetterSource[]
       rows.push({ index: i + 1, word: w, sources: srcs })
       prev = w
     }
@@ -42,29 +41,25 @@ export default function ViewPuzzleScreen() {
 
   const onShare = async () => {
     const text = makeShare(record)
-    try { await navigator.clipboard.writeText(text) }
-    catch { window.prompt('Copy your result:', text) }
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch {
+      window.prompt('Copy your result:', text)
+    }
   }
 
   return (
-    <div className="min-h-dvh w-full bg-white text-gray-900 overflow-hidden">
+    <div className="min-h-dvh w-full overflow-hidden bg-white text-gray-900">
       <BackHomeButton />
 
       <div className="mx-auto w-full max-w-[520px] px-4">
-        <div className="min-h-dvh flex flex-col">
-          <div className="my-auto pt-4 pb-6">
+        <div className="flex min-h-dvh flex-col">
+          <div className="my-auto pb-6 pt-4">
             {/* Rows */}
             <div className="space-y-[clamp(8px,2vw,12px)]">
               {playedRows.map(({ index, word, sources }) => (
-                <div key={`${index}-${word}`} className="relative w-fit mx-auto">
-                  <span
-                    className="
-                      absolute top-1/2 -translate-y-1/2
-                      w-[clamp(18px,4.8vw,30px)] text-right
-                      -left-[clamp(22px,5.5vw,40px)]
-                      text-[clamp(10px,2.7vw,12px)] text-gray-500 tabular-nums
-                    "
-                  >
+                <div key={`${index}-${word}`} className="relative mx-auto w-fit">
+                  <span className="absolute -left-[clamp(22px,5.5vw,40px)] top-1/2 w-[clamp(18px,4.8vw,30px)] -translate-y-1/2 text-right text-[clamp(10px,2.7vw,12px)] tabular-nums text-gray-500">
                     {index}
                   </span>
 
@@ -75,19 +70,13 @@ export default function ViewPuzzleScreen() {
                         key={i}
                         letter={ch}
                         intent={sources[i] === 'stack' ? 'stack' : 'bag'}
-                        className="
-                          rounded-2xl shadow-sm
-                          w-[clamp(34px,9vw,48px)] h-[clamp(34px,9vw,48px)]
-                          text-[clamp(16px,4.2vw,22px)]
-                        "
+                        className="h-[clamp(34px,9vw,48px)] w-[clamp(34px,9vw,48px)] rounded-2xl text-[clamp(16px,4.2vw,22px)] shadow-sm"
                       />
                     ))}
                   </div>
                 </div>
               ))}
             </div>
-
-
 
             {/* Bag */}
             <div className="mt-4 sm:mt-5">
@@ -101,9 +90,7 @@ export default function ViewPuzzleScreen() {
                       letter={ch}
                       muted
                       intent="bag"
-                      className="rounded-2xl
-                                 w-[clamp(42px,10vw,56px)] h-[clamp(42px,10vw,56px)]
-                                 text-[clamp(18px,4.5vw,24px)]"
+                      className="h-[clamp(42px,10vw,56px)] w-[clamp(42px,10vw,56px)] rounded-2xl text-[clamp(18px,4.5vw,24px)]"
                     />
                   </div>
                 ))}
@@ -111,9 +98,10 @@ export default function ViewPuzzleScreen() {
             </div>
 
             {/* Result line */}
-            <div className="mt-4 text-center text-base sm:text-lg text-gray-700">
+            <div className="mt-4 text-center text-base text-gray-700 sm:text-lg">
               Cleared <span className="font-semibold text-gray-900">{record.stacksCleared}</span>{' '}
-              Stacks in <span className="font-semibold text-gray-900">{formatClock(record.durationSec)}</span>
+              Stacks in{' '}
+              <span className="font-semibold text-gray-900">{formatClock(record.durationSec)}</span>
             </div>
 
             {/* Actions */}
@@ -121,14 +109,14 @@ export default function ViewPuzzleScreen() {
               <button
                 type="button"
                 onClick={onShare}
-                className="h-10 px-5 rounded-full bg-cyan-600 text-white font-semibold hover:bg-cyan-500"
+                className="h-10 rounded-full bg-cyan-600 px-5 font-semibold text-white hover:bg-cyan-500"
               >
                 Share
               </button>
               <button
                 type="button"
                 onClick={() => go('landing')}
-                className="h-10 px-5 rounded-full border border-emerald-300 text-emerald-900 bg-white/60"
+                className="h-10 rounded-full border border-emerald-300 bg-white/60 px-5 text-emerald-900"
               >
                 Main
               </button>

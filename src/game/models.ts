@@ -1,4 +1,3 @@
-
 export type Letter = string // 'A'..'Z'
 
 export type DailyPuzzle = {

@@ -3,7 +3,7 @@ import { useGameStore } from '@/store/gameStore'
 import clsx from 'clsx'
 
 export function BagCounts() {
-  const { puzzle, bagCounts, previewReserved } = useGameStore(s => ({
+  const { puzzle, bagCounts, previewReserved } = useGameStore((s) => ({
     puzzle: s.puzzle,
     bagCounts: s.bagCounts,
     previewReserved: s.previewReserved,
@@ -38,17 +38,17 @@ export function BagCounts() {
         className="grid justify-center gap-2"
         style={{ gridTemplateColumns: 'repeat(4, minmax(52px, 1fr))' }} // ⬅️ fixed 4 columns
       >
-        {lettersInBag.map(l => {
+        {lettersInBag.map((l) => {
           const avail = Math.max(0, (bagCounts[l] || 0) - (previewDelta[l] || 0))
           const zero = avail === 0
           return (
             <div
               key={l}
               className={clsx(
-                'flex items-center justify-center rounded-lg border h-9 text-sm select-none',
+                'flex h-9 select-none items-center justify-center rounded-lg border text-sm',
                 zero
-                  ? 'text-gray-400 border-gray-200 bg-gray-50'
-                  : 'text-gray-900 bg-emerald-50 border-emerald-200'
+                  ? 'border-gray-200 bg-gray-50 text-gray-400'
+                  : 'border-emerald-200 bg-emerald-50 text-gray-900'
               )}
               aria-label={`${l} available: ${avail}`}
               title={`${l}: ${avail}`}

@@ -12,14 +12,14 @@ function getRect(sel: string): Rect | null {
 }
 
 export function FlightLayer() {
-  const { flights, consumeFlight, reduceMotion } = useGameStore(s => ({
+  const { flights, consumeFlight, reduceMotion } = useGameStore((s) => ({
     flights: s.flights,
     consumeFlight: s.consumeFlight,
     reduceMotion: s.reduceMotion,
   }))
   return createPortal(
     <div className="pointer-events-none fixed inset-0 z-[60]">
-      {flights.map(f => (
+      {flights.map((f) => (
         <Flight
           key={f.id}
           id={f.id}
@@ -36,7 +36,12 @@ export function FlightLayer() {
 }
 
 function Flight({
-  id, letter, from, to, onDone, reduceMotion,
+  id,
+  letter,
+  from,
+  to,
+  onDone,
+  reduceMotion,
 }: {
   id: string
   letter: string
@@ -50,7 +55,8 @@ function Flight({
 
   // measure immediately and retry next frame if needed
   useLayoutEffect(() => {
-    const fSel = from.type === 'bag' ? `[data-bag-idx="${from.index}"]` : `[data-stack-pos="${from.pos}"]`
+    const fSel =
+      from.type === 'bag' ? `[data-bag-idx="${from.index}"]` : `[data-stack-pos="${from.pos}"]`
     const tSel = `[data-slot-idx="${to.slot}"]`
 
     const measure = () => {
@@ -86,7 +92,7 @@ function Flight({
       onAnimationComplete={onDone}
       className="flex items-center justify-center"
     >
-      <div className="tile tile-lg w-16 h-16 sm:w-20 sm:h-20">{letter}</div>
+      <div className="tile tile-lg h-16 w-16 sm:h-20 sm:w-20">{letter}</div>
     </motion.div>
   )
 }

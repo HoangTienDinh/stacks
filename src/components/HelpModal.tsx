@@ -2,13 +2,11 @@ import clsx from 'clsx'
 import { BAG_SIZE, PERFECT_STACKS } from '@/game/constants'
 import { Modal } from '@/components/Modal'
 
-export function HelpModal({
-  open, onClose,
-}: { open: boolean; onClose: () => void }) {
+export function HelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <Modal open={open} onClose={onClose} ariaLabel="How to play Stacks">
       {/* Header stays visible; body scrolls */}
-      <header className="flex items-center justify-between px-4 py-3 border-b">
+      <header className="flex items-center justify-between border-b px-4 py-3">
         <h2 className="text-lg font-semibold">How to Play</h2>
         <button
           type="button"
@@ -21,7 +19,7 @@ export function HelpModal({
 
       {/* Scrollable content */}
       <div
-        className="px-4 py-4 space-y-5 text-sm leading-6 text-gray-700 overflow-y-auto"
+        className="space-y-5 overflow-y-auto px-4 py-4 text-sm leading-6 text-gray-700"
         style={{ maxHeight: 'calc(88dvh - 56px - env(safe-area-inset-bottom, 0px))' }}
       >
         {/* Step 1 */}
@@ -31,11 +29,11 @@ export function HelpModal({
         >
           <Diagram
             labelTop="Current Stack"
-            top={['T','R','E','A','D']}
-            topTone="match"              // ← BLUE for the current stack
+            top={['T', 'R', 'E', 'A', 'D']}
+            topTone="match" // ← BLUE for the current stack
             labelBottom="Your word"
-            bottom={['B','R','E','A','D']}
-            match={[false,true,true,false,false]}
+            bottom={['B', 'R', 'E', 'A', 'D']}
+            match={[false, true, true, false, false]}
             note="Your word must share 1–4 letters in the SAME positions."
           />
         </Section>
@@ -67,14 +65,14 @@ export function HelpModal({
 
         {/* Invalid example */}
         <div className="mt-3 rounded-xl border bg-gray-50 p-3">
-          <p className="font-medium mb-2">Invalid example</p>
+          <p className="mb-2 font-medium">Invalid example</p>
           <Diagram
             labelTop="Current Stack"
-            top={['Q','U','E','U','E']}
-            topTone="match"             // ← BLUE for the current stack
+            top={['Q', 'U', 'E', 'U', 'E']}
+            topTone="match" // ← BLUE for the current stack
             labelBottom="Your word"
-            bottom={['R','E','A','C','T']}
-            match={[false,false,false,false,false]}
+            bottom={['R', 'E', 'A', 'C', 'T']}
+            match={[false, false, false, false, false]}
             note="This is NOT allowed: it shares 0 letters in the same positions."
             invalid
           />
@@ -87,21 +85,32 @@ export function HelpModal({
 /* ---------- helpers / mini “infographic” pieces ---------- */
 
 function MiniTile({
-  ch, tone='default',
-}: { ch: string; tone?: 'default'|'match'|'bag'|'muted'|'invalid' }) {
+  ch,
+  tone = 'default',
+}: {
+  ch: string
+  tone?: 'default' | 'match' | 'bag' | 'muted' | 'invalid'
+}) {
   const cls = clsx(
     'inline-flex h-8 w-8 items-center justify-center rounded-lg border text-base font-semibold mx-0.5',
-    tone === 'match'  && 'bg-cyan-50 border-cyan-300',
-    tone === 'bag'    && 'bg-emerald-50 border-emerald-300',
-    tone === 'muted'  && 'bg-gray-50 border-gray-200 text-gray-400',
-    tone === 'invalid'&& 'bg-red-50 border-red-300',
-    tone === 'default'&& 'bg-white border-gray-300'
+    tone === 'match' && 'bg-cyan-50 border-cyan-300',
+    tone === 'bag' && 'bg-emerald-50 border-emerald-300',
+    tone === 'muted' && 'bg-gray-50 border-gray-200 text-gray-400',
+    tone === 'invalid' && 'bg-red-50 border-red-300',
+    tone === 'default' && 'bg-white border-gray-300'
   )
   return <span className={cls}>{ch}</span>
 }
 
 function Diagram({
-  labelTop, top, labelBottom, bottom, match, note, invalid=false, topTone='default',
+  labelTop,
+  top,
+  labelBottom,
+  bottom,
+  match,
+  note,
+  invalid = false,
+  topTone = 'default',
 }: {
   labelTop: string
   top: string[]
@@ -111,22 +120,20 @@ function Diagram({
   note?: string
   invalid?: boolean
   /** How to color the "Current Stack" tiles (use 'match' for blue) */
-  topTone?: 'default'|'match'|'bag'|'muted'|'invalid'
+  topTone?: 'default' | 'match' | 'bag' | 'muted' | 'invalid'
 }) {
   return (
     <div>
-      <p className="text-xs text-gray-500 mb-1">{labelTop}</p>
+      <p className="mb-1 text-xs text-gray-500">{labelTop}</p>
       <div className="mb-2">
-        {top.map((c, i) => <MiniTile key={`t-${i}`} ch={c} tone={topTone} />)}
+        {top.map((c, i) => (
+          <MiniTile key={`t-${i}`} ch={c} tone={topTone} />
+        ))}
       </div>
-      <p className="text-xs text-gray-500 mb-1">{labelBottom}</p>
+      <p className="mb-1 text-xs text-gray-500">{labelBottom}</p>
       <div className="mb-2">
         {bottom.map((c, i) => (
-          <MiniTile
-            key={`b-${i}`}
-            ch={c}
-            tone={invalid ? 'invalid' : (match[i] ? 'match' : 'bag')}
-          />
+          <MiniTile key={`b-${i}`} ch={c} tone={invalid ? 'invalid' : match[i] ? 'match' : 'bag'} />
         ))}
       </div>
       {note && <p className="text-xs text-gray-600">{note}</p>}
@@ -155,8 +162,14 @@ function Legend() {
 }
 
 function Section({
-  title, caption, children,
-}: { title: string; caption?: string; children?: React.ReactNode }) {
+  title,
+  caption,
+  children,
+}: {
+  title: string
+  caption?: string
+  children?: React.ReactNode
+}) {
   return (
     <section>
       <h3 className="font-medium">{title}</h3>

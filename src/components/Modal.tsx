@@ -30,13 +30,10 @@ export function Modal({ open, onClose, ariaLabel, panelClassName, children }: Mo
       <div className="absolute inset-0 bg-black/30" />
 
       {/* Wrapper sits on top. Click anywhere in here that's NOT the panel → close */}
-      <div
-        className="absolute inset-0 flex items-center justify-center p-4"
-        onClick={onClose}
-      >
+      <div className="absolute inset-0 flex items-center justify-center p-4" onClick={onClose}>
         <div
           className={clsx(
-            'w-[min(92vw,560px)] max-h-[88dvh] overflow-auto rounded-2xl bg-white shadow-2xl border',
+            'max-h-[88dvh] w-[min(92vw,560px)] overflow-auto rounded-2xl border bg-white shadow-2xl',
             panelClassName
           )}
           onClick={(e) => e.stopPropagation()} // don’t close when clicking inside the panel

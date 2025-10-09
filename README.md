@@ -1,29 +1,33 @@
-
 # Stacks — MVP
 
 Daily word game: make **5-letter words** that **overlap 1–4 letters** with the previous stack and **spend letters from a 15-tile bag** until it hits **0**.
 Score = **Finished in N Stacks in M:SS**.
 
 ## Quick start
+
 ```bash
 npm i
 npm run dev
 ```
 
 ## Build & deploy to GitHub Pages (sub-route)
+
 ```bash
 # replace /stacks/ with your repo/route
 BASE_URL=/stacks/ npm run build
 ```
+
 Publish `dist/` to GitHub Pages.
 
 ### Optional: GitHub Action
+
 Create `.github/workflows/deploy.yml`:
+
 ```yaml
 name: Deploy
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 permissions:
   contents: write
 jobs:

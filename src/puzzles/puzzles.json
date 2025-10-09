@@ -2,31 +2,31 @@
   "2025-10-08": {
     "wordOfDay": "ARISE",
     "bestPath": ["STONE", "BRING", "GRACE"],
-    "bagList": ["S","T","O","N","B","R","I","G","G","A","C","E"]
+    "bagList": ["S", "T", "O", "N", "B", "R", "I", "G", "G", "A", "C", "E"]
   },
   "2025-10-09": {
     "wordOfDay": "POINT",
     "bestPath": ["PLATE", "CRONE", "TREAD"],
-    "bagList": ["L","A","T","E","C","R","O","N","T","E","A","D"]
+    "bagList": ["L", "A", "T", "E", "C", "R", "O", "N", "T", "E", "A", "D"]
   },
   "2025-10-10": {
     "wordOfDay": "SHINE",
     "bestPath": ["SCARF", "CRANE", "SMOTE"],
-    "bagList": ["C","A","R","F","C","R","N","E","S","M","O","T"]
+    "bagList": ["C", "A", "R", "F", "C", "R", "N", "E", "S", "M", "O", "T"]
   },
   "2025-10-11": {
     "wordOfDay": "CLOUD",
     "bestPath": ["STONY", "CRANE", "PLAIT"],
-    "bagList": ["S","T","N","Y","C","R","A","E","P","L","I","T"]
+    "bagList": ["S", "T", "N", "Y", "C", "R", "A", "E", "P", "L", "I", "T"]
   },
   "2025-10-12": {
     "wordOfDay": "BASIC",
     "bestPath": ["BRAVE", "CROWD", "BRINE"],
-    "bagList": ["R","A","V","E","C","O","W","D","B","I","N","E"]
+    "bagList": ["R", "A", "V", "E", "C", "O", "W", "D", "B", "I", "N", "E"]
   },
   "2025-10-13": {
     "wordOfDay": "QUEUE",
     "bestPath": ["BRACE", "TREAD", "CROWN"],
-    "bagList": ["B","R","A","C","T","E","A","D","C","O","W","N"]
+    "bagList": ["B", "R", "A", "C", "T", "E", "A", "D", "C", "O", "W", "N"]
   }
 }

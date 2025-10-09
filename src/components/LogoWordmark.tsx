@@ -17,8 +17,7 @@ export function LogoWordmark({ letters = 'STACKS', className }: Props) {
           key={`${ch}-${i}`}
           letter={ch}
           intent={i % 2 === 0 ? 'stack' : 'bag'}
-          className="w-[clamp(52px,14vw,80px)] h-[clamp(52px,14vw,80px)]
-                     text-[clamp(20px,5.5vw,34px)]"
+          className="h-[clamp(52px,14vw,80px)] w-[clamp(52px,14vw,80px)] text-[clamp(20px,5.5vw,34px)]"
         />
       ))}
     </div>

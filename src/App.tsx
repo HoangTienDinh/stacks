@@ -5,7 +5,7 @@ import LandingScreen from '@/screens/LandingScreen'
 import ViewPuzzleScreen from '@/screens/ViewPuzzleScreen'
 
 export default function App() {
-  const screen = useUIStore(s => s.screen)
+  const screen = useUIStore((s) => s.screen)
 
   return (
     <div className="min-h-dvh w-full bg-white text-gray-900">

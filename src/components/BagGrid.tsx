@@ -3,22 +3,21 @@ import { useGameStore } from '@/store/gameStore'
 import { Tile } from './Tile'
 
 export function BagGrid() {
-  const {
-    puzzle, usedIndices, previewReserved, pushBagIndex, currentStack, candidate,
-  } = useGameStore(s => ({
-    puzzle: s.puzzle,
-    usedIndices: s.usedIndices,
-    previewReserved: s.previewReserved,
-    pushBagIndex: s.pushBagIndex,
-    currentStack: s.currentStack,
-    candidate: s.candidate,
-  }))
+  const { puzzle, usedIndices, previewReserved, pushBagIndex, currentStack, candidate } =
+    useGameStore((s) => ({
+      puzzle: s.puzzle,
+      usedIndices: s.usedIndices,
+      previewReserved: s.previewReserved,
+      pushBagIndex: s.pushBagIndex,
+      currentStack: s.currentStack,
+      candidate: s.candidate,
+    }))
 
   const nextIdx = candidate.padEnd(5, ' ').slice(0, 5).indexOf(' ')
 
   return (
-    <div className="mt-2 mb-6">
-      <div className="mx-auto grid grid-cols-4 place-items-center gap-3 md:gap-4 max-w-[400px]">
+    <div className="mb-6 mt-2">
+      <div className="mx-auto grid max-w-[400px] grid-cols-4 place-items-center gap-3 md:gap-4">
         {puzzle.bagList.map((ch, i) => {
           const used = usedIndices.has(i)
           const reserved = previewReserved.has(i)
@@ -41,8 +40,8 @@ export function BagGrid() {
                 intent="bag"
                 emphasis={isPosHint}
                 className={clsx(
-                  'w-16 h-16 text-2xl sm:w-20 sm:h-20 sm:text-3xl',
-                  isPosHint && '!bg-cyan-50 !border-cyan-600'
+                  'h-16 w-16 text-2xl sm:h-20 sm:w-20 sm:text-3xl',
+                  isPosHint && '!border-cyan-600 !bg-cyan-50'
                 )}
               />
             </button>
