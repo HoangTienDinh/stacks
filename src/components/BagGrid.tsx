@@ -1,15 +1,16 @@
+// src/components/BagGrid.tsx
 import clsx from 'clsx'
 import { useGameStore } from '@/store/gameStore'
 import { Tile } from './Tile'
 
 export function BagGrid() {
   const {
-    puzzle, usedIndices, previewReserved, pushLetter, currentStack, candidate,
+    puzzle, usedIndices, previewReserved, pushBagIndex, currentStack, candidate,
   } = useGameStore(s => ({
     puzzle: s.puzzle,
     usedIndices: s.usedIndices,
     previewReserved: s.previewReserved,
-    pushLetter: s.pushLetter,
+    pushBagIndex: s.pushBagIndex,
     currentStack: s.currentStack,
     candidate: s.candidate,
   }))
@@ -18,9 +19,7 @@ export function BagGrid() {
 
   return (
     <div className="mt-2 mb-6">
-      <div
-        className="mx-auto grid grid-cols-4 place-items-center gap-3 md:gap-4 max-w-[400px]"
-      >
+      <div className="mx-auto grid grid-cols-4 place-items-center gap-3 md:gap-4 max-w-[400px]">
         {puzzle.bagList.map((ch, i) => {
           const used = usedIndices.has(i)
           const reserved = previewReserved.has(i)
@@ -31,16 +30,14 @@ export function BagGrid() {
             <button
               key={i}
               type="button"
-              onClick={() => !muted && pushLetter(ch)}
+              onClick={() => !muted && pushBagIndex(i)}
               disabled={muted}
               className={clsx(
                 'rounded-xl',
                 isPosHint && 'ring-2 ring-cyan-300 ring-offset-1'
               )}
               aria-label={`Bag tile ${ch}${used ? ', used' : reserved ? ', in use' : isPosHint ? ', positional match' : ', available'}`}
-              title={isPosHint ? 'Positional match — will use from current stack' : undefined}
             >
-              {/* Force the same square + type size as CandidateRow */}
               <Tile
                 letter={ch}
                 muted={muted}

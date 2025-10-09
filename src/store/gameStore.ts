@@ -29,6 +29,7 @@ export type Actions = {
   shuffleBag: () => void
   submit: () => void
   undo: () => void
+  pushBagIndex: (bagIndex: number) => void;
   undoTo: (index: number) => void
   consumeFlight: (id: string) => void
   setKeyboardOpen: (open: boolean) => void
@@ -162,6 +163,41 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
     })
 
     get().shuffleBag()
+  },
+
+  pushBagIndex: (bagIndex) => {
+    const S = get()
+    const idx = firstEmpty(S.candidate)
+    if (idx === -1) return                        // row full
+    if (S.usedIndices.has(bagIndex)) return       // already spent
+    if (S.previewReserved.has(bagIndex)) return   // temporarily reserved by typing
+
+    const letter = (S.puzzle.bagList[bagIndex] || '').toUpperCase()
+    if (!letter) return
+
+    const arr = S.candidate.padEnd(5, ' ').slice(0,5).split('')
+    const meta = [...S.slotMeta]
+    const preview = new Set(S.previewReserved); preview.add(bagIndex)
+
+    meta[idx] = { source: 'bag', bagIndex }
+    arr[idx] = letter
+    const candidate = arr.join('')
+
+    const flight: Flight = {
+      id: cryptoId(),
+      letter,
+      from: { type: 'bag', index: bagIndex },
+      to: { slot: idx }
+    }
+
+    set({
+      candidate,
+      slotMeta: meta,
+      previewReserved: preview,
+      flights: [...S.flights, flight],
+    })
+
+    import('@/utils/sound').then(m => m.signalBag?.())
   },
 
   setCandidate: (s) => set({ candidate: s.toUpperCase().slice(0,5) }),
