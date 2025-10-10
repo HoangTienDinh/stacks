@@ -9,8 +9,8 @@ import puzzles from '@/puzzles/puzzles.json'
 import { useUIStore } from '@/store/uiStore'
 import { signalError } from '@/utils/sound'
 
-import type { DailyPuzzle, GameState } from '@/game/models'
-import type { SessionSnapshotV1, SlotMetaSnap } from '@/persistence/session'
+import type { DailyPuzzle , GameHistoryItem, GameState } from '@/game/models'
+import type { HistoryItemSnap, SessionSnapshotV1, SlotMetaSnap } from '@/persistence/session'
 
 type SlotMeta = SlotMetaSnap
 type Flight = {
@@ -124,7 +124,7 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
       set({
         puzzle,
         currentStack: snap!.currentStack,
-        history: snap!.history || [],
+        history: upgradeHistory(snap!.history),
         usedIndices: new Set<number>(snap!.usedIndices || []),
         bagCounts: snap!.bagCounts || {},
         status: 'playing',
@@ -575,8 +575,7 @@ if (typeof window !== 'undefined') {
         version: 1,
         dateKey: s.puzzle.date,
         puzzle: { wordOfDay: s.puzzle.wordOfDay, bagList: s.puzzle.bagList },
-
-        history: s.history,
+        history: s.history.map((h) => ({ word: h.word, spent: h.spent })) as HistoryItemSnap[],
         usedIndices: Array.from(s.usedIndices),
         bagCounts: s.bagCounts,
         currentStack: s.currentStack,
@@ -592,15 +591,28 @@ if (typeof window !== 'undefined') {
     }, 120)
   })
 }
+function upgradeHistory(hist: HistoryItemSnap[] | undefined | null): GameHistoryItem[] {
+  if (!hist?.length) return []
+  // Provide safe defaults for fields that don't exist in the snapshot
+  const now = Date.now()
+  return hist.map((h, i) => ({
+    word: h.word,
+    spent: h.spent,
+    overlap: 0,       // default; adjust if you later need real overlap in history
+    ts: now - (hist.length - 1 - i), // stable, increasing-ish timestamp
+  }))
+}
 
 function putAt(arr: string[], idx: number, ch: string) {
   const a = [...arr]
   a[idx] = ch
   return a
 }
+
 function cryptoId() {
   return Math.random().toString(36).slice(2, 10)
 }
+
 function findBagIndexForLetter(S: ReturnType<typeof useGameStore.getState>, letter: string) {
   const L = letter.toUpperCase()
   for (let i = 0; i < S.puzzle.bagList.length; i++) {
