@@ -135,8 +135,9 @@ export function GameScreen() {
           paddingBottom: keyboardOpen ? 'calc(env(safe-area-inset-bottom, 0px) + 300px)' : '2.5rem',
         }}
       >
-        <div className="flex min-h-dvh flex-col">
-          <div className="my-auto pb-4 pt-6">
+        {/* Full-height stage that centers its inner content vertically */}
+        <div className="min-h-dvh grid">
+          <div className="w-full pb-4 pt-6 place-self-center">
             {/* Stacks timeline + current stack */}
             <div className="mb-3">
               <RollColumn words={rollWords} onPick={pickStackPos} />
