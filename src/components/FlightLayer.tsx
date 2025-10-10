@@ -1,6 +1,7 @@
-import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+
 import { useGameStore } from '@/store/gameStore'
 
 type Rect = { x: number; y: number; w: number; h: number }
@@ -22,7 +23,6 @@ export function FlightLayer() {
       {flights.map((f) => (
         <Flight
           key={f.id}
-          id={f.id}
           letter={f.letter}
           from={f.from}
           to={f.to}
@@ -36,14 +36,12 @@ export function FlightLayer() {
 }
 
 function Flight({
-  id,
   letter,
   from,
   to,
   onDone,
   reduceMotion,
 }: {
-  id: string
   letter: string
   from: { type: 'bag'; index: number } | { type: 'stack'; pos: number }
   to: { slot: number }
@@ -53,21 +51,24 @@ function Flight({
   const [fromRect, setFromRect] = useState<Rect | null>(null)
   const [toRect, setToRect] = useState<Rect | null>(null)
 
-  // measure immediately and retry next frame if needed
+  // Measure immediately and keep retrying on the next frames until both rects exist.
+  // This avoids depending on local state in the effect deps.
   useLayoutEffect(() => {
     const fSel =
       from.type === 'bag' ? `[data-bag-idx="${from.index}"]` : `[data-stack-pos="${from.pos}"]`
     const tSel = `[data-slot-idx="${to.slot}"]`
 
-    const measure = () => {
-      setFromRect(getRect(fSel))
-      setToRect(getRect(tSel))
+    let raf = 0
+    const tick = () => {
+      const f = getRect(fSel)
+      const t = getRect(tSel)
+      setFromRect(f)
+      setToRect(t)
+      if (!f || !t) raf = requestAnimationFrame(tick)
     }
-    measure()
-    if (!fromRect || !toRect) {
-      const raf = requestAnimationFrame(measure)
-      return () => cancelAnimationFrame(raf)
-    }
+
+    tick()
+    return () => cancelAnimationFrame(raf)
   }, [from, to])
 
   if (!fromRect || !toRect) return null

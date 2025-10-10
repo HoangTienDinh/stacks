@@ -1,8 +1,8 @@
 // src/App.tsx
-import { useUIStore } from '@/store/uiStore'
 import { GameScreen } from '@/screens/GameScreen'
 import LandingScreen from '@/screens/LandingScreen'
 import ViewPuzzleScreen from '@/screens/ViewPuzzleScreen'
+import { useUIStore } from '@/store/uiStore'
 
 export default function App() {
   const screen = useUIStore((s) => s.screen)

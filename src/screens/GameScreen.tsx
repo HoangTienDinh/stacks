@@ -1,16 +1,17 @@
 import { useEffect } from 'react'
-import { useGameStore } from '@/store/gameStore'
+
+import { BackHomeButton } from '@/components/BackHomeButton'
+import { BagCounts } from '@/components/BagCounts'
 import { BagGrid } from '@/components/BagGrid'
 import { CandidateRow } from '@/components/CandidateRow'
+import { FlightLayer } from '@/components/FlightLayer'
+import { InlineActions } from '@/components/InlineActions'
+import { MobileKeyboard } from '@/components/MobileKeyboard'
 import { ResultModal } from '@/components/ResultModal'
+import { RollColumn } from '@/components/RollColumn'
 import { Toast } from '@/components/Toast'
 import { loadDictionaries } from '@/game/dictionary'
-import { RollColumn } from '@/components/RollColumn'
-import { FlightLayer } from '@/components/FlightLayer'
-import { MobileKeyboard } from '@/components/MobileKeyboard'
-import { BagCounts } from '@/components/BagCounts'
-import { BackHomeButton } from '@/components/BackHomeButton'
-import { InlineActions } from '@/components/InlineActions'
+import { useGameStore } from '@/store/gameStore'
 
 export function GameScreen() {
   const {

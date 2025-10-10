@@ -1,6 +1,7 @@
-import type { GameState } from './models'
 import { counts } from './counts'
 import { hasWord } from './dictionary'
+
+import type { GameState } from './models'
 
 export type Validation =
   | { ok: true; need: Record<string, number>; overlap: number }

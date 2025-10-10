@@ -1,5 +1,6 @@
-import { Tile } from '@/components/Tile'
 import clsx from 'clsx'
+
+import { Tile } from '@/components/Tile'
 
 type Props = {
   letters?: string

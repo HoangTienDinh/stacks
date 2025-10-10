@@ -1,5 +1,6 @@
-import { useGameStore } from '@/store/gameStore'
 import clsx from 'clsx'
+
+import { useGameStore } from '@/store/gameStore'
 
 export function CandidateRow() {
   const { candidate, popLetter, slotMeta } = useGameStore((s) => ({

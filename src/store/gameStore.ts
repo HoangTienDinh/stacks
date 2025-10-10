@@ -1,15 +1,18 @@
 import { create } from 'zustand'
-import type { DailyPuzzle, GameState } from '@/game/models'
-import puzzles from '@/puzzles/puzzles.json'
+
+import { applyMove, replayUsedIndices } from '@/game/apply'
+import { BAG_SIZE } from '@/game/constants'
 import { counts } from '@/game/counts'
 import { validateMove } from '@/game/validate'
-import { applyMove, replayUsedIndices } from '@/game/apply'
-import { signalError } from '@/utils/sound'
-import { BAG_SIZE } from '@/game/constants'
+import { clearSession, loadSession, saveSession } from '@/persistence/session'
+import puzzles from '@/puzzles/puzzles.json'
 import { useUIStore } from '@/store/uiStore'
-import { saveSession, loadSession, clearSession, SessionSnapshotV1 } from '@/persistence/session'
+import { signalError } from '@/utils/sound'
 
-type SlotMeta = { source: 'bag' | 'stack' | 'error' | null; bagIndex?: number; stackPos?: number }
+import type { DailyPuzzle, GameState } from '@/game/models'
+import type { SessionSnapshotV1, SlotMetaSnap } from '@/persistence/session'
+
+type SlotMeta = SlotMetaSnap
 type Flight = {
   id: string
   letter: string
@@ -102,9 +105,9 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
 
   loadToday: (dateKey) => {
     const key = dateKey || new Date().toISOString().slice(0, 10)
-    const p =
-      (puzzles as Record<string, Omit<DailyPuzzle, 'date'>>)[key] ||
-      (puzzles as any)[Object.keys(puzzles)[0]]
+    const byDate = puzzles as Record<string, Omit<DailyPuzzle, 'date'>>
+    const firstKey = Object.keys(byDate)[0] as keyof typeof byDate
+    const p = byDate[key] ?? byDate[firstKey]
     const normalizedBag = normalizeBag12(p.bagList)
     const puzzle: DailyPuzzle = { date: key, wordOfDay: p.wordOfDay, bagList: normalizedBag }
 
@@ -134,7 +137,7 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
         lastGame: undefined,
 
         candidate: snap!.candidate || '',
-        slotMeta: (snap!.slotMeta as any[]) || Array.from({ length: 5 }, () => ({ source: null })),
+        slotMeta: (snap!.slotMeta as SlotMeta[]) || Array.from({ length: 5 }, () => ({ source: null })),
         previewReserved: new Set<number>(snap!.previewReserved || []),
 
         error: null,
@@ -579,7 +582,7 @@ if (typeof window !== 'undefined') {
         currentStack: s.currentStack,
 
         candidate: s.candidate,
-        slotMeta: s.slotMeta as any,
+        slotMeta: s.slotMeta as SlotMetaSnap[],
         previewReserved: Array.from(s.previewReserved),
 
         undoCount: s.undoCount,

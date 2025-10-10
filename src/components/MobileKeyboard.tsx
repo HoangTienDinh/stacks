@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+
 import { useGameStore } from '@/store/gameStore'
 
 const TOP = 'QWERTYUIOP'

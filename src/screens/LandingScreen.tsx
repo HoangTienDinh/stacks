@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
-import { useUIStore } from '@/store/uiStore'
-import { LogoWordmark } from '@/components/LogoWordmark'
+
 import { HelpModal } from '@/components/HelpModal'
+import { LogoWordmark } from '@/components/LogoWordmark'
 import { ResultModal } from '@/components/ResultModal'
 import { hasRecord, todayKey } from '@/stats/stats'
+import { useUIStore } from '@/store/uiStore'
 
 export default function LandingScreen() {
   const go = useUIStore((s) => s.go)

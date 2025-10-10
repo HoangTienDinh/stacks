@@ -1,9 +1,16 @@
 let ctx: AudioContext | null = null
 
+// Helper to get a constructor that works on Safari (webkitAudioContext)
+function audioContextCtor(): typeof AudioContext | null {
+  const w = window as unknown as { webkitAudioContext?: typeof AudioContext }
+  return window.AudioContext ?? w.webkitAudioContext ?? null
+}
+
 export function playErrorTone() {
   try {
-    // Lazy-init web audio (works on desktop; mobile requires user gesture first)
-    ctx = ctx || new (window.AudioContext || (window as any).webkitAudioContext)()
+    const Ctor = audioContextCtor()
+    if (!Ctor) return
+    ctx = ctx ?? new Ctor()
     const o = ctx.createOscillator()
     const g = ctx.createGain()
     o.type = 'sine'
@@ -18,15 +25,20 @@ export function playErrorTone() {
 
     o.start(t)
     o.stop(t + 0.17)
-  } catch {
+  } catch (e) {
     // ignore if audio init blocked
+    console.error(e)
+    return
   }
 }
 
 export function vibrate(ms = 18) {
   try {
     navigator.vibrate?.(ms)
-  } catch {}
+  } catch (e) {
+    console.error(e)
+    return
+  }
 }
 
 export function signalError() {
@@ -35,11 +47,16 @@ export function signalError() {
 }
 
 function ac() {
-  return ctx ?? (ctx = new (window.AudioContext || (window as any).webkitAudioContext)())
+  if (ctx) return ctx
+  const Ctor = audioContextCtor()
+  if (!Ctor) return (ctx = null)
+  ctx = new Ctor()
+  return ctx
 }
 
 function beep(freq: number, dur = 0.08, gain = 0.04) {
   const a = ac()
+  if (!a) return
   const o = a.createOscillator()
   const g = a.createGain()
   o.frequency.value = freq

@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import clsx from 'clsx'
+import { useEffect } from 'react'
 
 type ModalProps = {
   open: boolean

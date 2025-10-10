@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion'
-import { useGameStore } from '@/store/gameStore'
 import clsx from 'clsx'
+import { motion } from 'framer-motion'
+
+import { useGameStore } from '@/store/gameStore'
 
 function UndoChip({ onClick }: { onClick: () => void }) {
   return (

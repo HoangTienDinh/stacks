@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
-import { useGameStore } from '@/store/gameStore'
 import clsx from 'clsx'
+import { useEffect, useState } from 'react'
+
+import { useGameStore } from '@/store/gameStore'
 
 export function ControlsBar() {
   const { shuffleBag, clearRow, submit, keyboardOpen, toggleKeyboard, candidate, slotMeta } =

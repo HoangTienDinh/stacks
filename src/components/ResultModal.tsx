@@ -1,9 +1,10 @@
-import { useMemo, useState, useEffect } from 'react'
 import clsx from 'clsx'
+import { useEffect, useMemo, useState } from 'react'
+
 import { Modal } from '@/components/Modal'
+import { computeStats, formatClock, loadGames, makeShare, todayKey } from '@/stats/stats'
 import { useGameStore } from '@/store/gameStore'
 import { useUIStore } from '@/store/uiStore'
-import { computeStats, formatClock, loadGames, makeShare, todayKey } from '@/stats/stats'
 
 type ResultModalProps =
   | { source?: 'game' } // default: auto-opens after clear
@@ -39,20 +40,20 @@ export function ResultModal(props: ResultModalProps) {
         ? [...stored, lastGame]
         : stored
     return computeStats(withCurrent)
-  }, [lastGame?.finishedAt])
-
+  }, [lastGame])
   const today = todayKey()
   const todayRecord = useMemo(() => {
     const games = loadGames()
     const r = games.find((g) => g.dateKey === today)
     if (!r && lastGame?.dateKey === today) return lastGame
     return r
-  }, [today, lastGame?.finishedAt])
+  }, [today, lastGame])
 
-  // ---- open/close logic ----
-  const isFromLanding = (props as any)?.source === 'landing'
-  const open = isFromLanding ? (props as any).open : status === 'cleared' && !!lastGame
-  const onClose = isFromLanding ? (props as any).onClose : closeResults
+  // ---- open/close logic (no `any`) ----
+  // Only the 'landing' variant has `open`/`onClose`, so use that to narrow.
+  const isFromLanding = 'open' in props
+  const open = isFromLanding ? props.open : status === 'cleared' && !!lastGame
+  const onClose = isFromLanding ? props.onClose : closeResults
 
   // Early return AFTER all hooks are declared
   if (!open) return null
@@ -60,7 +61,9 @@ export function ResultModal(props: ResultModalProps) {
   // ---- derived UI strings ----
   const title = isFromLanding ? 'Stats' : 'Results'
   const heading = todayRecord
-    ? `Cleared ${todayRecord.stacksCleared} ${todayRecord.stacksCleared === 1 ? 'Stack' : 'Stacks'} in ${formatClock(todayRecord.durationSec)}`
+    ? `Cleared ${todayRecord.stacksCleared} ${
+        todayRecord.stacksCleared === 1 ? 'Stack' : 'Stacks'
+      } in ${formatClock(todayRecord.durationSec)}`
     : `How will you do in today's puzzle?`
 
   // ---- Share: copy to clipboard + toast text ----
@@ -76,7 +79,6 @@ export function ResultModal(props: ResultModalProps) {
   }
 
   // ---- secondary button logic ----
-  // Hide when opened from Landing AND today is already cleared
   const hideSecondary = isFromLanding && !!todayRecord
   const secondaryCta = todayRecord ? 'Main' : "Play Today's Puzzle"
   const onSecondary = () => {
@@ -145,15 +147,15 @@ export function ResultModal(props: ResultModalProps) {
             Share
           </button>
 
-          {!hideSecondary && (
-            <button
-              type="button"
-              onClick={onSecondary}
-              className="h-10 flex-1 rounded-xl border border-emerald-300 bg-white/60 text-emerald-900"
-            >
-              {secondaryCta}
-            </button>
-          )}
+            {!hideSecondary && (
+              <button
+                type="button"
+                onClick={onSecondary}
+                className="h-10 flex-1 rounded-xl border border-emerald-300 bg-white/60 text-emerald-900"
+              >
+                {secondaryCta}
+              </button>
+            )}
         </div>
 
         {/* Copy feedback */}

@@ -42,7 +42,7 @@ async function readIfExists(p) {
 }
 
 async function main() {
-  console.log('Fetching 5-letter lists…')
+  console.warn('Fetching 5-letter lists…')
   const pool = new Set()
 
   // 1) Remote sources (best-effort)
@@ -57,7 +57,7 @@ async function main() {
           add++
         }
       }
-      console.log(`✔ Fetched ${url} (+${add})`)
+      console.warn(`✔ Fetched ${url} (+${add})`)
     } catch (e) {
       console.warn(`⚠ Skipping ${url}: ${e.message}`)
     }
@@ -75,7 +75,7 @@ async function main() {
         add++
       }
     }
-    console.log(`✔ Merged local fallback ${path.basename(p)} (+${add})`)
+    console.warn(`✔ Merged local fallback ${path.basename(p)} (+${add})`)
   }
 
   // 3) Subtract banned
@@ -86,9 +86,9 @@ async function main() {
       const w = up(line)
       if (onlyFiveAZ(w) && pool.delete(w)) sub++
     }
-    console.log(`✔ Subtracted banned list (-${sub})`)
+    console.warn(`✔ Subtracted banned list (-${sub})`)
   } else {
-    console.log('ℹ No banned5.txt found; skipping subtraction')
+    console.warn('ℹ No banned5.txt found; skipping subtraction')
   }
 
   const words = Array.from(pool).sort()
@@ -100,7 +100,7 @@ async function main() {
 
   await fs.mkdir(path.dirname(OUT_PATH), { recursive: true })
   await fs.writeFile(OUT_PATH, words.join('\n') + '\n', 'utf8')
-  console.log(`✅ Wrote ${OUT_PATH} (${words.length} words)`)
+  console.warn(`✅ Wrote ${OUT_PATH} (${words.length} words)`)
 }
 
 main().catch((err) => {

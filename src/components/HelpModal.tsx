@@ -1,6 +1,7 @@
 import clsx from 'clsx'
-import { BAG_SIZE, PERFECT_STACKS } from '@/game/constants'
+
 import { Modal } from '@/components/Modal'
+import { BAG_SIZE, PERFECT_STACKS } from '@/game/constants'
 
 export function HelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (

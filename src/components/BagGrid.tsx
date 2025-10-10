@@ -1,5 +1,7 @@
 import clsx from 'clsx'
+
 import { useGameStore } from '@/store/gameStore'
+
 import { Tile } from './Tile'
 
 export function BagGrid() {

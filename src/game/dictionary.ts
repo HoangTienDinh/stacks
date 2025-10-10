@@ -15,8 +15,8 @@ export async function loadDictionaries() {
         .map((s) => s.trim().toUpperCase())
         .filter((s) => /^[A-Z]{5}$/.test(s))
 
-    const allowedLines = toLines((allowedMod as any).default || '')
-    const bannedLines = toLines((bannedMod as any).default || '')
+    const allowedLines = toLines(((allowedMod as { default: string }).default) || '')
+    const bannedLines  = toLines(((bannedMod  as { default: string }).default) || '')
 
     // Use allowed list if it's reasonably big; otherwise keep SMALL_SET
     if (allowedLines.length >= 2000) {
@@ -30,6 +30,7 @@ export async function loadDictionaries() {
     return { allowed: ALLOWED.size, banned: BANNED.size }
   } catch (e) {
     // Keep fallbacks
+    console.error(e)
     READY = true
     return { allowed: ALLOWED.size, banned: BANNED.size }
   }

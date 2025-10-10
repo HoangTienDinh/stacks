@@ -1,9 +1,10 @@
 import { useEffect, useMemo } from 'react'
-import { useUIStore } from '@/store/uiStore'
-import { useGameStore } from '@/store/gameStore'
+
 import { BackHomeButton } from '@/components/BackHomeButton'
 import { Tile } from '@/components/Tile'
-import { formatClock, getRecordByDate, makeShare, todayKey, type LetterSource } from '@/stats/stats'
+import { formatClock, getRecordByDate, type LetterSource, makeShare, todayKey } from '@/stats/stats'
+import { useGameStore } from '@/store/gameStore'
+import { useUIStore } from '@/store/uiStore'
 
 export default function ViewPuzzleScreen() {
   const go = useUIStore((s) => s.go)

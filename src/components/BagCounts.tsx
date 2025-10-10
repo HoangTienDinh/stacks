@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
-import { useGameStore } from '@/store/gameStore'
 import clsx from 'clsx'
+import { useMemo } from 'react'
+
+import { useGameStore } from '@/store/gameStore'
 
 export function BagCounts() {
   const { puzzle, bagCounts, previewReserved } = useGameStore((s) => ({
