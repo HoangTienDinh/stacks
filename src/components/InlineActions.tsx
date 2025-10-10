@@ -36,8 +36,8 @@ export function InlineActions({ className }: { className?: string }) {
     return () => m?.removeEventListener?.('change', update)
   }, [])
 
-  const canSubmit =
-    candidate.length === 5 && slotMeta.every((m) => m.source && m.source !== 'error')
+  const canSubmit = candidate.length === 5
+  const looksValid = slotMeta.every((m) => m.source && m.source !== 'error')
 
   return (
     <div className={clsx('flex w-full items-center justify-center gap-2 sm:gap-3', className)}>
@@ -67,9 +67,14 @@ export function InlineActions({ className }: { className?: string }) {
         type="button"
         onClick={submit}
         disabled={!canSubmit}
-        className="btn"
-        data-variant="primary"
-        data-size="sm"
+        className={clsx(
+          'order-4 h-9 whitespace-nowrap rounded-full px-3 text-[13px] font-semibold transition sm:px-4 sm:text-sm',
+          canSubmit
+            ? looksValid
+              ? 'bg-cyan-600 text-white hover:bg-cyan-500'
+              : 'bg-gray-900 text-white/95 hover:bg-gray-800'
+            : 'cursor-not-allowed bg-gray-200 text-gray-500'
+        )}
       >
         Submit
       </button>

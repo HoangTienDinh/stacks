@@ -108,9 +108,7 @@ export function GameScreen() {
       }
 
       if (k === 'Enter') {
-        const full = candidate.length === 5
-        const ok = full && slotMeta.every((m) => m.source && m.source !== 'error')
-        if (ok) {
+        if (candidate.length === 5) {
           e.preventDefault()
           submit()
         }

@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 
 import { useGameStore } from '@/store/gameStore'
@@ -38,8 +39,8 @@ export function MobileKeyboard() {
 
   if (!isTouch || !keyboardOpen) return null
 
-  const canSubmit =
-    candidate.length === 5 && slotMeta.every((m) => m.source && m.source !== 'error')
+  const canSubmit = candidate.length === 5
+  const looksValid = slotMeta.every((m) => m.source && m.source !== 'error')
 
   const Key = ({ ch, className = '' }: { ch: string; className?: string }) => (
     <button
@@ -91,9 +92,12 @@ export function MobileKeyboard() {
               type="button"
               onClick={() => canSubmit && submit()}
               disabled={!canSubmit}
-              className="btn col-span-2"
-              data-variant="primary"
-              data-size="sm"
+              className={clsx(
+                'col-span-2 h-11 rounded-lg border px-3 text-[15px] font-semibold shadow-sm disabled:opacity-40',
+                canSubmit
+                  ? (looksValid ? 'bg-cyan-600 text-white hover:bg-cyan-500' : 'bg-gray-900 text-white hover:bg-gray-800')
+                  : 'bg-gray-200 text-gray-500'
+              )}
             >
               Enter
             </button>

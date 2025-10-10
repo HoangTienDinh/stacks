@@ -1,53 +1,82 @@
-import { counts } from './counts'
-import { hasWord } from './dictionary'
+import { counts } from './counts';
+import { hasWord, isBanned } from './dictionary';
 
-import type { GameState } from './models'
+import type { GameState } from './models';
 
 export type Validation =
   | { ok: true; need: Record<string, number>; overlap: number }
-  | { ok: false; reason: string }
+  | { ok: false; code: ValidationCode; message: string };
+
+export type ValidationCode =
+  | 'not-5-letters'
+  | 'not-in-dictionary'
+  | 'banned-word'
+  | 'bad-overlap'
+  | 'insufficient-bag';
+
+export const REASONS: Record<ValidationCode, string> = {
+  'not-5-letters':     'Word must be 5 letters (A–Z)',
+  'not-in-dictionary': 'Not in dictionary',
+  'banned-word':       "That’s a baaaaaaad word",
+  'bad-overlap':       'Must share 1–4 letters in the same positions',
+  'insufficient-bag':  'Not enough letters left in the bag',
+};
 
 /**
- * Positional validation:
- * - Word must be 5 letters in dictionary
- * - Overlap = count of positions i where currentStack[i] === candidate[i]
- * - Must have 1–4 positional overlaps
- * - need = letter counts to pull from the bag after subtracting positional overlaps
+ * Rules:
+ *  - 5 letters A–Z
+ *  - not banned; must be in allowed list
+ *  - positional overlap = 1..4 with current stack
+ *  - need[] = letter multiset minus positional matches; bag must have enough
  */
 export function validateMove(state: GameState, candidate: string): Validation {
-  const w = candidate.toUpperCase()
-  if (!/^[A-Z]{5}$/.test(w)) return { ok: false, reason: 'Word must be 5 letters (A–Z)' }
-  if (!hasWord(w)) return { ok: false, reason: 'Not in dictionary' }
+  const w = candidate.toUpperCase();
 
-  // --- positional overlap (NOT multiset)
-  let overlap = 0
-  const overlapCounts: Record<string, number> = {}
+  if (!/^[A-Z]{5}$/.test(w)) {
+    return { ok: false, code: 'not-5-letters', message: REASONS['not-5-letters'] };
+  }
+
+  // Prefer "banned" over "not in dictionary" to give the right feedback.
+  if (isBanned(w)) {
+    return { ok: false, code: 'banned-word', message: REASONS['banned-word'] };
+  }
+  if (!hasWord(w)) {
+    return { ok: false, code: 'not-in-dictionary', message: REASONS['not-in-dictionary'] };
+  }
+
+  // Positional overlap (exact index matches)
+  let overlap = 0;
+  const overlapCounts: Record<string, number> = {};
   for (let i = 0; i < 5; i++) {
-    const cs = state.currentStack[i]
-    const cw = w[i]
+    const cs = state.currentStack[i];
+    const cw = w[i];
     if (cs === cw) {
-      overlap++
-      overlapCounts[cw] = (overlapCounts[cw] || 0) + 1
+      overlap++;
+      overlapCounts[cw] = (overlapCounts[cw] || 0) + 1;
     }
   }
-
   if (overlap < 1 || overlap > 4) {
-    return { ok: false, reason: 'Must share 1–4 letters by position' }
+    return { ok: false, code: 'bad-overlap', message: REASONS['bad-overlap'] };
   }
 
-  // Letters required from the bag = total counts minus positional matches
-  const need = counts(w)
+  // Letters needed from the bag = total counts minus positional matches
+  const need = counts(w);
   for (const l of Object.keys(need)) {
-    need[l] = Math.max(0, need[l] - (overlapCounts[l] || 0))
+    need[l] = Math.max(0, need[l] - (overlapCounts[l] || 0));
   }
 
-  // Ensure bag has enough for the needed letters
+  // Verify bag availability
   for (const l of Object.keys(need)) {
-    const have = state.bagCounts[l] || 0
+    const have = state.bagCounts[l] || 0;
     if (have < need[l]) {
-      return { ok: false, reason: `Need ${need[l]}×${l} but bag has ${have}×` }
+      return { ok: false, code: 'insufficient-bag', message: REASONS['insufficient-bag'] };
     }
   }
 
-  return { ok: true, need, overlap }
+  return { ok: true, need, overlap };
+}
+
+/** Single source of truth for friendly messages. */
+export function reasonMessage(code: ValidationCode): string {
+  return REASONS[code];
 }

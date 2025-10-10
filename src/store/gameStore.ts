@@ -420,7 +420,7 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
 
     const v = validateMove(s, s.candidate.toUpperCase())
     if (!('ok' in v) || !v.ok) {
-      set({ error: v.reason })
+      set({ error: v.message })
       import('@/utils/sound').then((m) => m.signalError?.())
       setTimeout(() => set({ error: null }), ERROR_TIMEOUT)
       return
