@@ -1,40 +1,37 @@
 import clsx from 'clsx'
 
+type TileIntent = 'default' | 'bag' | 'stack' | 'error'
+type TileHint = 'pos' | undefined
+
 type TileProps = {
   letter: string
   muted?: boolean
-  /** visual context. "bag" = soft green for unused bag tiles */
-  intent?: 'default' | 'bag' | 'stack' | 'error'
-  className?: string
+  intent?: TileIntent
   emphasis?: boolean
+  size?: 'lg' | 'md' | 'sm'
+  hint?: TileHint
+  className?: string
 }
 
 export function Tile({
   letter,
   muted = false,
   intent = 'default',
-  className,
   emphasis = false,
+  size = 'lg',
+  hint,
+  className,
 }: TileProps) {
-  const base = clsx(
-    'inline-flex h-16 w-16 items-center justify-center rounded-2xl',
-    'text-2xl font-semibold select-none shadow-sm transition',
-    'border',
-    emphasis && 'border-4'
-  )
-
-  const tone = muted
-    ? 'bg-gray-50 border-gray-200 text-gray-400'
-    : intent === 'bag'
-      ? 'bg-emerald-50 border-emerald-300 text-slate-900 hover:bg-emerald-100'
-      : intent === 'stack'
-        ? 'bg-cyan-50 border-cyan-300 text-slate-900 hover:bg-cyan-100'
-        : intent === 'error'
-          ? 'bg-red-50 border-red-300 text-slate-900'
-          : 'bg-white border-gray-300 text-slate-900 hover:bg-gray-100'
-
   return (
-    <div className={clsx(base, tone, className)} aria-hidden>
+    <div
+      className={clsx('tile', className)}
+      data-intent={intent}
+      data-muted={muted || undefined}
+      data-emphasis={emphasis || undefined}
+      data-size={size}
+      data-hint={hint}
+      aria-hidden
+    >
       {letter}
     </div>
   )

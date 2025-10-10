@@ -1,5 +1,3 @@
-import clsx from 'clsx'
-
 import { useGameStore } from '@/store/gameStore'
 
 import { Tile } from './Tile'
@@ -19,7 +17,7 @@ export function BagGrid() {
 
   return (
     <div className="mb-6 mt-2">
-      <div className="mx-auto grid max-w-[400px] grid-cols-4 place-items-center gap-3 md:gap-4">
+      <div className="grid-bag">
         {puzzle.bagList.map((ch, i) => {
           const used = usedIndices.has(i)
           const reserved = previewReserved.has(i)
@@ -41,10 +39,8 @@ export function BagGrid() {
                 muted={muted}
                 intent="bag"
                 emphasis={isPosHint}
-                className={clsx(
-                  'h-16 w-16 text-2xl sm:h-20 sm:w-20 sm:text-3xl',
-                  isPosHint && '!border-cyan-600 !bg-cyan-50'
-                )}
+                hint={isPosHint ? 'pos' : undefined}
+                size="lg"
               />
             </button>
           )

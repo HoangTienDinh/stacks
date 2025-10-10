@@ -2,94 +2,209 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================
+   TOKENS (light brand default)
+   =========================== */
 :root {
+  /* Theme switches */
   color-scheme: light;
+  --radius-tile: 1rem; /* rounded-2xl feel */
+  --shadow-tile: 0 1px 1px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+  --border-emphasis: 4px;
+
+  /* Base neutrals (approx Tailwind slate/gray in HSL) */
+  --bg: 0 0% 100%;
+  --surface: 0 0% 100%;
+  --surface-muted: 0 0% 97%;
+  --border: 220 14% 90%;
+  --text: 222 47% 11%;
+  --text-muted: 215 16% 47%;
+
+  /* Brand focus ring (cyan-500) */
+  --focus-ring: 192 91% 36%;
+
+  /* === BRAND: emerald (accent), cyan (info), red (danger) ===
+     QUICK REBRAND: change these six-tuples per semantic set. */
+
+  /* Accent ~ emerald */
+  --accent-50: 152 81% 96%;
+  --accent-100: 151 80% 90%;
+  --accent-300: 156 72% 67%;
+  --accent-500: 158 64% 52%;
+  --accent-600: 160 84% 39%;
+
+  /* Info ~ cyan */
+  --info-50: 185 100% 97%;
+  --info-100: 187 92% 90%;
+  --info-300: 191 94% 67%;
+  --info-500: 192 91% 36%;
+  --info-600: 193 74% 28%;
+
+  /* Danger ~ red */
+  --danger-50: 0 86% 97%;
+  --danger-100: 0 93% 89%;
+  --danger-300: 0 90% 71%;
+  --danger-500: 0 84% 60%;
+  --danger-600: 0 74% 42%;
+
+  /* Primary brand spot color (e.g., buttons) */
+  --brand-500: var(--accent-500);
 }
 
-.tile {
-  @apply inline-flex select-none items-center justify-center rounded-tile border border-gray-300 bg-white font-bold text-gray-900 shadow-tile;
-}
-.tile-muted {
-  @apply opacity-30;
-}
-.tile-lg {
-  @apply h-16 w-16 text-2xl sm:h-20 sm:w-20 sm:text-3xl;
-}
-.tile:hover {
-  @apply shadow-md;
-}
-button:disabled .tile {
-  @apply opacity-30;
+/* ===========================
+   DARK THEME OVERRIDES
+   Toggle with <html data-theme="dark">
+   =========================== */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: 220 14% 6%;
+  --surface: 220 14% 10%;
+  --surface-muted: 220 14% 12%;
+  --border: 220 10% 22%;
+  --text: 210 40% 96%;
+  --text-muted: 215 20% 70%;
+
+  /* Slightly adjust brand mixes for darker backgrounds */
+  --focus-ring: 192 91% 46%;
+
+  /* Keep brand hues but brighten a touch in dark */
+  --accent-50: 152 50% 12%;
+  --accent-100: 151 50% 18%;
+  --accent-300: 156 72% 50%;
+  --accent-500: 158 64% 56%;
+  --accent-600: 160 84% 62%;
+
+  --info-50: 190 50% 12%;
+  --info-100: 190 50% 18%;
+  --info-300: 191 94% 55%;
+  --info-500: 192 91% 58%;
+  --info-600: 193 74% 64%;
+
+  --danger-50: 0 50% 12%;
+  --danger-100: 0 55% 18%;
+  --danger-300: 0 80% 60%;
+  --danger-500: 0 80% 62%;
+  --danger-600: 0 74% 70%;
+
+  --brand-500: var(--accent-500);
 }
 
-.bag-grid {
-  @apply grid grid-cols-5 gap-3 sm:gap-4;
-}
-
-/* Footer buttons */
-.btn {
-  @apply inline-flex items-center justify-center rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 font-medium text-gray-900 shadow-sm active:translate-y-[1px];
-}
-.btn-primary {
-  @apply border-brand-500 bg-brand-500 text-white;
-}
-
-.modal-backdrop {
-  @apply fixed inset-0 flex items-center justify-center bg-black/40 p-4;
-}
-.modal-card {
-  @apply w-full max-w-sm rounded-2xl bg-white p-6;
-}
-
-/* Error state: soft red bg + shake */
-.tile-error {
-  @apply border-red-300 bg-red-50 ring-2 ring-red-400 ring-offset-2 ring-offset-white;
-  animation: tile-shake 160ms ease-in-out;
-}
-
-@keyframes tile-shake {
-  0% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-3px);
-  }
-  40% {
-    transform: translateX(3px);
-  }
-  60% {
-    transform: translateX(-2px);
-  }
-  80% {
-    transform: translateX(2px);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-/* from-stack hint (unchanged) */
-.tile-from-stack {
-  @apply border-cyan-300 bg-cyan-50;
-}
-
-/* from-bag hint: soft green */
-.tile-from-bag {
-  @apply border-emerald-300 bg-emerald-50;
-}
-
-/* Full-height app, no page scroll */
-html,
-body,
-#root {
-  height: 100%;
-}
+/* ===========================
+   GLOBAL STRUCTURE
+   =========================== */
+html, body, #root { height: 100%; }
 body {
+  background: hsl(var(--bg));
+  color: hsl(var(--text));
   overflow: hidden;
   overscroll-behavior: contain;
 }
 
+/* Accessible, consistent focus */
 .focus-ring:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.5); /* cyan-500 */
+  box-shadow: 0 0 0 2px hsl(var(--focus-ring) / 0.5);
 }
+
+/* ===========================
+   COMPONENT LAYER (semantic)
+   =========================== */
+@layer components {
+  /* Tile base */
+  .tile {
+    @apply inline-flex select-none items-center justify-center;
+    border-radius: var(--radius-tile);
+    box-shadow: var(--shadow-tile);
+    background-color: hsl(var(--surface));
+    color: hsl(var(--text));
+    border: 1px solid hsl(var(--border));
+    transition: box-shadow 150ms, transform 150ms, background-color 120ms, border-color 120ms;
+    font-weight: 700;
+  }
+
+  /* Sizes */
+  .tile[data-size='lg'] { @apply text-2xl sm:text-3xl; width: 4rem; height: 4rem; }
+  @media (min-width: 640px) {
+    .tile[data-size='lg'] { width: 5rem; height: 5rem; }
+  }
+
+  /* States by intent */
+  .tile[data-intent='bag'] {
+    background-color: hsl(var(--accent-50));
+    border-color: hsl(var(--accent-300));
+  }
+  /* Bag tile that is a positional match should read as "info/blue" */
+  .tile[data-intent='bag'][data-hint='pos'] {
+    background-color: hsl(var(--info-50));
+    border-color: hsl(var(--info-300));
+  }
+  .tile[data-intent='bag'][data-hint='pos']:hover {
+    background-color: hsl(var(--info-100));
+  }
+  .tile[data-intent='bag']:hover { background-color: hsl(var(--accent-100)); }
+
+  .tile[data-intent='stack'] {
+    background-color: hsl(var(--info-50));
+    border-color: hsl(var(--info-300));
+  }
+  .tile[data-intent='stack']:hover { background-color: hsl(var(--info-100)); }
+
+  .tile[data-intent='error'] {
+    background-color: hsl(var(--danger-50));
+    border-color: hsl(var(--danger-300));
+    animation: tile-shake 160ms ease-in-out;
+  }
+
+  /* Muted and emphasis */
+  .tile[data-muted='true'] {
+    background-color: hsl(var(--surface-muted));
+    border-color: hsl(var(--border));
+    color: hsl(var(--text-muted));
+    opacity: 0.6;
+  }
+  .tile[data-emphasis='true'] { border-width: var(--border-emphasis); }
+
+  /* Hover affordance for any tile */
+  .tile:hover { @apply shadow-md; }
+
+  /* Grid for bag (used across places) */
+  .grid-bag {
+    @apply grid grid-cols-4 place-items-center gap-3 md:gap-4 mx-auto;
+    max-width: 400px;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-3 font-medium shadow-sm active:translate-y-[1px];
+    background-color: hsl(var(--surface-muted));
+    color: hsl(var(--text));
+    border: 1px solid hsl(var(--border));
+  }
+  .btn--primary {
+    background-color: hsl(var(--brand-500));
+    border-color: hsl(var(--brand-500));
+    color: white;
+  }
+  .btn:disabled { opacity: 0.5; }
+
+  /* Modal */
+  .modal-backdrop { @apply fixed inset-0 flex items-center justify-center p-4; background: rgba(0,0,0,0.4); }
+  .modal-card { @apply w-full max-w-sm rounded-2xl p-6; background: hsl(var(--surface)); }
+
+  /* Candidate row layout */
+  .candidate-row { @apply flex items-center justify-center gap-3 min-h-[88px]; }
+
+  /* Shake animation */
+  @keyframes tile-shake {
+    0% { transform: translateX(0) }
+    20% { transform: translateX(-3px) }
+    40% { transform: translateX(3px) }
+    60% { transform: translateX(-2px) }
+    80% { transform: translateX(2px) }
+    100% { transform: translateX(0) }
+  }
+}
+
+/* Legacy helpers preserved (safe to delete later if unused) */
+.bag-grid { @apply grid grid-cols-5 gap-3 sm:gap-4; }

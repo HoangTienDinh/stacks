@@ -13,7 +13,7 @@ export function CandidateRow() {
   const last = candidate.trimEnd().length - 1
 
   return (
-    <div className="flex min-h-[88px] items-center justify-center gap-3">
+    <div className="candidate-row">
       {letters.map((ch, i) => {
         const m = slotMeta[i]
         const isError = m?.source === 'error'
@@ -21,6 +21,11 @@ export function CandidateRow() {
         const fromBag = m?.source === 'bag'
         const key = `${i}-${ch}-${m?.source ?? 'n'}`
         const filled = !!ch.trim()
+
+        // Map meta -> intent semantics
+        const intent =
+          isError ? 'error' : fromStack ? 'stack' : fromBag ? 'bag' : 'default'
+
         return (
           <div
             key={key}
@@ -30,12 +35,10 @@ export function CandidateRow() {
             onClick={() => {
               if (filled && i === last) popLetter()
             }}
-            className={clsx(
-              'tile tile-lg h-16 w-16 transition-[box-shadow,transform] sm:h-20 sm:w-20',
-              isError && 'tile-error',
-              fromStack && 'tile-from-stack',
-              fromBag && 'tile-from-bag'
-            )}
+            className={clsx('tile')}
+            data-intent={intent}
+            data-size="lg"
+            // emphasis not used for candidate tiles by default
           >
             {ch.trim() || ''}
           </div>
