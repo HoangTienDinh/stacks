@@ -6,13 +6,15 @@ import { BAG_SIZE, PERFECT_STACKS } from '@/game/constants'
 export function HelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <Modal open={open} onClose={onClose} ariaLabel="How to play Stacks">
-      {/* Header stays visible; body scrolls */}
-      <header className="flex items-center justify-between border-b px-4 py-3">
-        <h2 className="text-lg font-semibold">How to Play</h2>
+      {/* Header */}
+      <header className="flex items-center justify-between border-b border-token px-4 py-3 bg-surface">
+        <h2 className="text-lg font-semibold text-text">How to Play</h2>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg border px-2 py-1 text-sm hover:bg-gray-50"
+          className="btn"
+          data-variant="outline"
+          data-size="sm"
         >
           Close
         </button>
@@ -20,7 +22,7 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
 
       {/* Scrollable content */}
       <div
-        className="space-y-5 overflow-y-auto px-4 py-4 text-sm leading-6 text-gray-700"
+        className="space-y-5 overflow-y-auto px-4 py-4 text-sm leading-6 text-text"
         style={{ maxHeight: 'calc(88dvh - 56px - env(safe-area-inset-bottom, 0px))' }}
       >
         {/* Step 1 */}
@@ -31,7 +33,7 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
           <Diagram
             labelTop="Current Stack"
             top={['T', 'R', 'E', 'A', 'D']}
-            topTone="match" // ← BLUE for the current stack
+            topTone="match" /* blue for stack */
             labelBottom="Your word"
             bottom={['B', 'R', 'E', 'A', 'D']}
             match={[false, true, true, false, false]}
@@ -42,7 +44,7 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
         {/* Step 2 */}
         <Section
           title="2) Spend tiles from the Bag"
-          caption="Each move must use at least one tile from the bag. Tiles you pick turn gray until you submit."
+          caption="Each move must use at least one tile from the bag. Tiles you pick turn muted until you submit."
         >
           <Legend />
         </Section>
@@ -57,7 +59,7 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
         />
 
         {/* Quick tips */}
-        <ul className="mt-2 grid gap-2 text-[0.95rem]">
+        <ul className="mt-2 grid gap-2 text-[0.95rem] text-text">
           <li>• Tap letters in the Current Stack to use a positional match.</li>
           <li>• Tap green tiles in the Bag to use them.</li>
           <li>• Shuffle reorders the Bag; Undo reverts the last submitted Stack.</li>
@@ -65,12 +67,12 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
         </ul>
 
         {/* Invalid example */}
-        <div className="mt-3 rounded-xl border bg-gray-50 p-3">
-          <p className="mb-2 font-medium">Invalid example</p>
+        <div className="mt-3 rounded-xl border border-token bg-surface-muted p-3">
+          <p className="mb-2 font-medium text-text">Invalid example</p>
           <Diagram
             labelTop="Current Stack"
             top={['Q', 'U', 'E', 'U', 'E']}
-            topTone="match" // ← BLUE for the current stack
+            topTone="match"
             labelBottom="Your word"
             bottom={['R', 'E', 'A', 'C', 'T']}
             match={[false, false, false, false, false]}
@@ -92,15 +94,25 @@ function MiniTile({
   ch: string
   tone?: 'default' | 'match' | 'bag' | 'muted' | 'invalid'
 }) {
-  const cls = clsx(
-    'inline-flex h-8 w-8 items-center justify-center rounded-lg border text-base font-semibold mx-0.5',
-    tone === 'match' && 'bg-cyan-50 border-cyan-300',
-    tone === 'bag' && 'bg-emerald-50 border-emerald-300',
-    tone === 'muted' && 'bg-gray-50 border-gray-200 text-gray-400',
-    tone === 'invalid' && 'bg-red-50 border-red-300',
-    tone === 'default' && 'bg-white border-gray-300'
+  const intent =
+    tone === 'match' ? 'stack'
+      : tone === 'bag' ? 'bag'
+      : tone === 'invalid' ? 'error'
+      : 'default'
+  const isMuted = tone === 'muted'
+
+  return (
+    <span
+      className="tile"
+      data-size="mini"
+      data-intent={intent}
+      data-muted={isMuted || undefined}
+      aria-hidden
+      style={{ marginInline: '2px' }}
+    >
+      {ch}
+    </span>
   )
-  return <span className={cls}>{ch}</span>
 }
 
 function Diagram({
@@ -120,24 +132,27 @@ function Diagram({
   match: boolean[]
   note?: string
   invalid?: boolean
-  /** How to color the "Current Stack" tiles (use 'match' for blue) */
   topTone?: 'default' | 'match' | 'bag' | 'muted' | 'invalid'
 }) {
   return (
     <div>
-      <p className="mb-1 text-xs text-gray-500">{labelTop}</p>
+      <p className="label-muted mb-1">{labelTop}</p>
       <div className="mb-2">
         {top.map((c, i) => (
           <MiniTile key={`t-${i}`} ch={c} tone={topTone} />
         ))}
       </div>
-      <p className="mb-1 text-xs text-gray-500">{labelBottom}</p>
+      <p className="label-muted mb-1">{labelBottom}</p>
       <div className="mb-2">
         {bottom.map((c, i) => (
-          <MiniTile key={`b-${i}`} ch={c} tone={invalid ? 'invalid' : match[i] ? 'match' : 'bag'} />
+          <MiniTile
+            key={`b-${i}`}
+            ch={c}
+            tone={invalid ? 'invalid' : match[i] ? 'match' : 'bag'}
+          />
         ))}
       </div>
-      {note && <p className="text-xs text-gray-600">{note}</p>}
+      {note && <p className="text-xs text-muted">{note}</p>}
     </div>
   )
 }
@@ -145,18 +160,18 @@ function Diagram({
 function Legend() {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <span className="text-xs text-gray-500">Legend:</span>
+      <span className="label-muted">Legend:</span>
       <div className="flex items-center gap-2">
         <MiniTile ch="R" tone="match" />
-        <span className="text-xs text-gray-600">position match</span>
+        <span className="text-xs text-muted">position match</span>
       </div>
       <div className="flex items-center gap-2">
         <MiniTile ch="A" tone="bag" />
-        <span className="text-xs text-gray-600">from bag</span>
+        <span className="text-xs text-muted">from bag</span>
       </div>
       <div className="flex items-center gap-2">
         <MiniTile ch="E" tone="muted" />
-        <span className="text-xs text-gray-600">in use / spent</span>
+        <span className="text-xs text-muted">in use / spent</span>
       </div>
     </div>
   )
@@ -173,8 +188,8 @@ function Section({
 }) {
   return (
     <section>
-      <h3 className="font-medium">{title}</h3>
-      {caption && <p className="text-gray-600">{caption}</p>}
+      <h3 className="font-medium text-text">{title}</h3>
+      {caption && <p className="text-muted">{caption}</p>}
       {children}
     </section>
   )

@@ -51,13 +51,9 @@ function Flight({
   const [fromRect, setFromRect] = useState<Rect | null>(null)
   const [toRect, setToRect] = useState<Rect | null>(null)
 
-  // Measure immediately and keep retrying on the next frames until both rects exist.
-  // This avoids depending on local state in the effect deps.
   useLayoutEffect(() => {
-    const fSel =
-      from.type === 'bag' ? `[data-bag-idx="${from.index}"]` : `[data-stack-pos="${from.pos}"]`
+    const fSel = from.type === 'bag' ? `[data-bag-idx="${from.index}"]` : `[data-stack-pos="${from.pos}"]`
     const tSel = `[data-slot-idx="${to.slot}"]`
-
     let raf = 0
     const tick = () => {
       const f = getRect(fSel)
@@ -66,7 +62,6 @@ function Flight({
       setToRect(t)
       if (!f || !t) raf = requestAnimationFrame(tick)
     }
-
     tick()
     return () => cancelAnimationFrame(raf)
   }, [from, to])
@@ -93,7 +88,9 @@ function Flight({
       onAnimationComplete={onDone}
       className="flex items-center justify-center"
     >
-      <div className="tile tile-lg h-16 w-16 sm:h-20 sm:w-20">{letter}</div>
+      <div className="tile" data-size="lg" aria-hidden>
+        {letter}
+      </div>
     </motion.div>
   )
 }

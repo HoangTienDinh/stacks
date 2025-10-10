@@ -6,23 +6,10 @@ import { useGameStore } from '@/store/gameStore'
 function KeyboardIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" {...props}>
-      <rect
-        x="3"
-        y="6"
-        width="18"
-        height="12"
-        rx="2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      {/* keys */}
+      <rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
       <path
-        d="M6 10h1M9 10h1M12 10h1M15 10h1M18 10h1
-               M6 13h1M9 13h1M12 13h4M18 13h1"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
+        d="M6 10h1M9 10h1M12 10h1M15 10h1M18 10h1 M6 13h1M9 13h1M12 13h4M18 13h1"
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round"
       />
     </svg>
   )
@@ -52,11 +39,6 @@ export function InlineActions({ className }: { className?: string }) {
   const canSubmit =
     candidate.length === 5 && slotMeta.every((m) => m.source && m.source !== 'error')
 
-  // Slightly tighter padding/font on narrow screens so all four fit one line.
-  const pill =
-    'h-9 rounded-full border border-emerald-300 bg-white/60 px-3 sm:px-4 ' +
-    'text-[13px] sm:text-sm font-medium text-emerald-900 hover:bg-emerald-50 whitespace-nowrap'
-
   return (
     <div className={clsx('flex w-full items-center justify-center gap-2 sm:gap-3', className)}>
       {isTouch && (
@@ -65,17 +47,19 @@ export function InlineActions({ className }: { className?: string }) {
           onClick={() => setKeyboardOpen(!keyboardOpen)}
           aria-label={keyboardOpen ? 'Close keyboard' : 'Open keyboard'}
           title="Keyboard"
-          className="order-1 flex h-9 w-9 items-center justify-center rounded-full border border-emerald-300 bg-white/60 text-emerald-900 hover:bg-emerald-50"
+          className="btn btn-circle"
+          data-variant="outline"
+          data-size="sm"
         >
           <KeyboardIcon />
         </button>
       )}
 
-      <button type="button" onClick={shuffleBag} className={clsx(pill, 'order-2')}>
+      <button type="button" onClick={shuffleBag} className="btn" data-variant="ghost" data-size="sm">
         Shuffle
       </button>
 
-      <button type="button" onClick={clearRow} className={clsx(pill, 'order-3')}>
+      <button type="button" onClick={clearRow} className="btn" data-variant="ghost" data-size="sm">
         Clear
       </button>
 
@@ -83,12 +67,9 @@ export function InlineActions({ className }: { className?: string }) {
         type="button"
         onClick={submit}
         disabled={!canSubmit}
-        className={clsx(
-          'order-4 h-9 whitespace-nowrap rounded-full px-3 text-[13px] font-semibold transition sm:px-4 sm:text-sm',
-          canSubmit
-            ? 'bg-cyan-600 text-white hover:bg-cyan-500'
-            : 'cursor-not-allowed bg-gray-200 text-gray-500'
-        )}
+        className="btn"
+        data-variant="primary"
+        data-size="sm"
       >
         Submit
       </button>

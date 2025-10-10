@@ -1,0 +1,94 @@
+/* ===========================
+   TOKENS (light brand default)
+   =========================== */
+
+:root {
+  /* Theme indicator for UA */
+  color-scheme: light;
+
+  /* Radii, shadows, motion */
+  --radius-tile: 1rem;                /* rounded-2xl look */
+  --radius-pill: 9999px;
+  --shadow-tile: 0 1px 1px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-card: 0 2px 10px rgba(0,0,0,0.06);
+  --border-emphasis: 4px;
+  --duration-fast: 150ms;
+  --ease-standard: cubic-bezier(.2, .6, .2, 1);
+
+  /* Base neutrals (HSL) */
+  --bg: 0 0% 100%;
+  --surface: 0 0% 100%;
+  --surface-muted: 0 0% 97%;
+  --border: 220 14% 90%;
+  --text: 222 47% 11%;
+  --text-muted: 215 16% 47%;
+
+  /* Focus ring (cyan-500) */
+  --focus-ring: 192 91% 36%;
+
+  /* === BRAND: emerald (accent), cyan (info), red (danger) ===
+     QUICK REBRAND: edit these tuples and --brand-500.
+  */
+  /* Accent ~ emerald */
+  --accent-50: 152 81% 96%;
+  --accent-100: 151 80% 90%;
+  --accent-300: 156 72% 67%;
+  --accent-500: 158 64% 52%;
+  --accent-600: 160 84% 39%;
+
+  /* Info ~ cyan */
+  --info-50: 185 100% 97%;
+  --info-100: 187 92% 90%;
+  --info-300: 191 94% 67%;
+  --info-500: 192 91% 36%;
+  --info-600: 193 74% 28%;
+
+  /* Danger ~ red */
+  --danger-50: 0 86% 97%;
+  --danger-100: 0 93% 89%;
+  --danger-300: 0 90% 71%;
+  --danger-500: 0 84% 60%;
+  --danger-600: 0 74% 42%;
+
+  /* Primary action */
+  --brand-500: var(--accent-500);
+}
+
+/* ===========================
+   DARK THEME OVERRIDES
+   Toggle via: <html data-theme="dark">
+   =========================== */
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: 220 14% 6%;
+  --surface: 220 14% 10%;
+  --surface-muted: 220 14% 12%;
+  --border: 220 10% 22%;
+  --text: 210 40% 96%;
+  --text-muted: 215 20% 70%;
+
+  --focus-ring: 192 91% 46%;
+
+  /* Keep hues; slightly brighten on dark */
+  --accent-50: 152 50% 12%;
+  --accent-100: 151 50% 18%;
+  --accent-300: 156 72% 50%;
+  --accent-500: 158 64% 56%;
+  --accent-600: 160 84% 62%;
+
+  --info-50: 190 50% 12%;
+  --info-100: 190 50% 18%;
+  --info-300: 191 94% 55%;
+  --info-500: 192 91% 58%;
+  --info-600: 193 74% 64%;
+
+  --danger-50: 0 50% 12%;
+  --danger-100: 0 55% 18%;
+  --danger-300: 0 80% 60%;
+  --danger-500: 0 80% 62%;
+  --danger-600: 0 74% 70%;
+
+  --brand-500: var(--accent-500);
+}

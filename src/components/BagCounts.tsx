@@ -10,7 +10,7 @@ export function BagCounts() {
     previewReserved: s.previewReserved,
   }))
 
-  // Preserve *original* bag order: first occurrence of each letter wins
+  // Preserve first-appearance order
   const lettersInBag = useMemo(() => {
     const seen = new Set<string>()
     const ordered: string[] = []
@@ -23,7 +23,7 @@ export function BagCounts() {
     return ordered
   }, [puzzle.bagList])
 
-  // How many are temporarily reserved by the current row (typing preview)
+  // Temp reserved deltas for current row
   const previewDelta = useMemo(() => {
     const delta: Record<string, number> = {}
     for (const i of Array.from(previewReserved)) {
@@ -37,7 +37,7 @@ export function BagCounts() {
     <div className="mx-auto max-w-md px-4 pb-4">
       <div
         className="grid justify-center gap-2"
-        style={{ gridTemplateColumns: 'repeat(4, minmax(52px, 1fr))' }} // ⬅️ fixed 4 columns
+        style={{ gridTemplateColumns: 'repeat(4, minmax(52px, 1fr))' }}
       >
         {lettersInBag.map((l) => {
           const avail = Math.max(0, (bagCounts[l] || 0) - (previewDelta[l] || 0))
@@ -48,8 +48,8 @@ export function BagCounts() {
               className={clsx(
                 'flex h-9 select-none items-center justify-center rounded-lg border text-sm',
                 zero
-                  ? 'border-gray-200 bg-gray-50 text-gray-400'
-                  : 'border-emerald-200 bg-emerald-50 text-gray-900'
+                  ? 'border-token bg-surface-muted text-muted'
+                  : 'bg-accent50 border-accent300 text-text'
               )}
               aria-label={`${l} available: ${avail}`}
               title={`${l}: ${avail}`}

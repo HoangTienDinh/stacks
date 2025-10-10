@@ -45,11 +45,9 @@ export function MobileKeyboard() {
     <button
       type="button"
       onClick={() => typeLetter(ch)}
-      className={
-        'h-11 rounded-lg border bg-gray-50 text-[15px] font-medium shadow-sm active:bg-gray-100 ' +
-        'w-full' +
-        className
-      }
+      className={`btn w-full ${className}`}
+      data-variant="outline"
+      data-size="sm"
     >
       {ch}
     </button>
@@ -59,7 +57,7 @@ export function MobileKeyboard() {
     <div className="fixed inset-x-0 bottom-0 z-40 sm:hidden">
       {/* Panel is fully constrained to viewport width and safe area */}
       <div className="pointer-events-auto mx-auto w-full max-w-[680px] px-3">
-        <div className="rounded-t-2xl border bg-white p-3 pb-[max(env(safe-area-inset-bottom),8px)] shadow-2xl">
+        <div className="rounded-t-2xl border border-token bg-surface p-3 pb-[max(env(safe-area-inset-bottom),8px)] shadow-2xl">
           {/* Row 1: 10 equally-sized keys */}
           <div className="mb-2 grid grid-cols-10 gap-1">
             {TOP.split('').map((ch) => (
@@ -67,7 +65,7 @@ export function MobileKeyboard() {
             ))}
           </div>
 
-          {/* Row 2: letters + Backspace (backspace gets 2 columns so it's easy to hit) */}
+          {/* Row 2: letters + Backspace (Backspace gets 2 columns) */}
           <div className="mb-2 grid grid-cols-11 gap-1">
             {MID.split('').map((ch) => (
               <Key key={ch} ch={ch} />
@@ -76,7 +74,9 @@ export function MobileKeyboard() {
               type="button"
               onClick={popLetter}
               aria-label="Backspace"
-              className="col-span-2 h-11 rounded-lg border bg-gray-50 text-[15px] font-medium shadow-sm active:bg-gray-100"
+              className="btn col-span-2"
+              data-variant="outline"
+              data-size="sm"
             >
               ⌫
             </button>
@@ -91,7 +91,9 @@ export function MobileKeyboard() {
               type="button"
               onClick={() => canSubmit && submit()}
               disabled={!canSubmit}
-              className="col-span-2 h-11 rounded-lg border bg-violet-600 px-3 text-[15px] font-semibold text-white shadow-sm disabled:opacity-40"
+              className="btn col-span-2"
+              data-variant="primary"
+              data-size="sm"
             >
               Enter
             </button>
@@ -102,14 +104,17 @@ export function MobileKeyboard() {
             <button
               type="button"
               onClick={() => setKeyboardOpen(false)}
-              className="text-sm text-gray-700 underline"
+              className="text-sm underline text-text"
+              aria-label="Close keyboard"
             >
               Close
             </button>
             <button
               type="button"
               onClick={shuffleBag}
-              className="h-9 rounded-lg border bg-white px-3 text-sm font-medium shadow-sm"
+              className="btn"
+              data-variant="outline"
+              data-size="sm"
               aria-label="Shuffle bag letters"
             >
               Shuffle

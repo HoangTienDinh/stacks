@@ -10,7 +10,9 @@ function UndoChip({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       aria-label="Undo last stack"
       title="Undo last stack"
-      className="ml-2 inline-flex h-8 w-8 items-center justify-center rounded-full border border-red-300 bg-red-50 text-red-600 transition hover:bg-red-100 active:scale-[0.98]"
+      className="tile mx-[0.15em]"
+      data-intent="error"   // uses bg: danger-50, border: danger-300
+      data-size="md"        // same size as current-stack tiles
     >
       <svg
         width="16"
@@ -21,6 +23,7 @@ function UndoChip({ onClick }: { onClick: () => void }) {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        className="text-[hsl(var(--danger-600))]"  // icon uses the deeper red
       >
         <path d="M9 14l-4-4 4-4" />
         <path d="M20 20v-6a4 4 0 0 0-4-4H5" />
@@ -46,10 +49,8 @@ function Row({
   onPick?: (pos: number) => void
   rightAction?: React.ReactNode
 }) {
-  // Stronger “crawl” feel: a little larger near the current row,
-  // then shrink & rise as depth increases.
   const scale = faded ? Math.max(0.66, 0.96 - depth * 0.12) : 1
-  const y = faded ? -12 - depth * 26 : 0 // slight initial lift
+  const y = faded ? -12 - depth * 26 : 0
   const opacity = faded ? Math.max(0.35, 0.9 - depth * 0.12) : 1
   const interactive = !!onPick && !faded
 
@@ -61,13 +62,13 @@ function Row({
       style={{ transformOrigin: 'center bottom' }}
     >
       <div className="pr-2 text-right">
-        <span className={faded ? 'text-xs text-gray-400' : 'text-sm text-gray-900'}>{index}</span>
+        <span className={faded ? 'text-xs text-muted' : 'text-sm text-text'}>{index}</span>
       </div>
 
       <div
         className={clsx(
           interactive ? 'tracking-normal' : 'tracking-[0.3em]',
-          faded ? 'text-2xl font-semibold text-gray-400 sm:text-[28px]' : 'text-3xl font-semibold'
+          faded ? 'text-2xl font-semibold text-muted sm:text-[28px]' : 'text-3xl font-semibold text-text'
         )}
       >
         {word.split('').map((c, i) => {
@@ -79,7 +80,9 @@ function Row({
                 type="button"
                 {...commonProps}
                 onClick={() => onPick?.(i)}
-                className="mx-[0.15em] inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300 bg-cyan-50 shadow-sm transition hover:bg-cyan-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 active:scale-95"
+                className="tile mx-[0.15em]"
+                data-intent="stack"
+                data-size="md"          // was "mini"
                 aria-label={`Use ${c} from stack slot ${i + 1}`}
               >
                 <span className="tracking-normal">{c}</span>
@@ -90,10 +93,7 @@ function Row({
             <span
               key={i}
               {...commonProps}
-              style={{
-                display: 'inline-block',
-                transform: 'perspective(520px) rotateX(18deg)', // enhance 3D feel
-              }}
+              style={{ display: 'inline-block', transform: 'perspective(520px) rotateX(18deg)' }}
             >
               {c}
               {i < word.length - 1 ? ' ' : ''}
@@ -125,24 +125,12 @@ export function RollColumn({
       : olderRaw
 
   return (
-    // Give the column its own stage and allow overflow above (no clipping).
     <div className="relative flex min-h-[220px] flex-col items-stretch justify-end overflow-visible sm:min-h-[260px]">
-      {/* Faded history anchored above the current row. Increase the offset
-         if you later change the current row button size. */}
-      <div
-        className="pointer-events-none absolute bottom-[60px] left-0 right-0 flex flex-col gap-1 px-2 sm:bottom-[68px]"
-        style={{ overflow: 'visible' }}
-      >
+      <div className="pointer-events-none absolute bottom-[60px] left-0 right-0 flex flex-col gap-1 px-2 sm:bottom-[68px]">
         {older.map((w, i) => {
           const depth = older.length - 1 - i
           return (
-            <Row
-              key={`${w.index}-${w.word}-${i}`}
-              index={w.index}
-              word={w.word}
-              faded
-              depth={depth}
-            />
+            <Row key={`${w.index}-${w.word}-${i}`} index={w.index} word={w.word} faded depth={depth} />
           )
         })}
       </div>

@@ -7,7 +7,7 @@ type Props = {
   className?: string
 }
 
-/** Alternates cyan/emerald tiles and scales responsively. */
+/** Alternates info/blue and accent/green tiles and scales responsively. */
 export function LogoWordmark({ letters = 'STACKS', className }: Props) {
   const chars = letters.split('')
 
@@ -18,6 +18,7 @@ export function LogoWordmark({ letters = 'STACKS', className }: Props) {
           key={`${ch}-${i}`}
           letter={ch}
           intent={i % 2 === 0 ? 'stack' : 'bag'}
+          // layout sizing stays inline (not theme-driven)
           className="h-[clamp(52px,14vw,80px)] w-[clamp(52px,14vw,80px)] text-[clamp(20px,5.5vw,34px)]"
         />
       ))}

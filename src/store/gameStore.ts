@@ -27,6 +27,8 @@ type TimerState = {
 }
 type RowRecord = { word: string; sources: ('stack' | 'bag')[] }
 
+const ERROR_TIMEOUT = 1800
+
 export type Actions = {
   loadToday: (dateKey?: string) => void
   setCandidate: (s: string) => void
@@ -245,7 +247,7 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
     if (bagIdx === -1) {
       set({ error: `No ${letter} left in bag` })
       signalError()
-      setTimeout(() => set({ error: null }), 1200)
+      setTimeout(() => set({ error: null }), ERROR_TIMEOUT)
       return
     }
     const preview = new Set(S.previewReserved)
@@ -412,7 +414,7 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
     ) {
       set({ error: 'Invalid letters in row' })
       import('@/utils/sound').then((m) => m.signalError?.())
-      setTimeout(() => set({ error: null }), 1200)
+      setTimeout(() => set({ error: null }), ERROR_TIMEOUT)
       return
     }
 
@@ -420,7 +422,7 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
     if (!('ok' in v) || !v.ok) {
       set({ error: v.reason })
       import('@/utils/sound').then((m) => m.signalError?.())
-      setTimeout(() => set({ error: null }), 1600)
+      setTimeout(() => set({ error: null }), ERROR_TIMEOUT)
       return
     }
 
@@ -538,7 +540,7 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
     if (idx !== pos) {
       set({ error: 'Use the letter in the matching slot' })
       import('@/utils/sound').then((m) => m.signalError?.())
-      setTimeout(() => set({ error: null }), 900)
+      setTimeout(() => set({ error: null }), ERROR_TIMEOUT)
       return
     }
     const letter = S.currentStack[pos]
