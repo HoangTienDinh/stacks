@@ -158,20 +158,27 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
   flights: [],
 
   loadToday: (dateKey) => {
-    const key = dateKey || new Date().toISOString().slice(0, 10);
-    const byDate = puzzles as Record<string, Omit<DailyPuzzle, 'date'>>;
-    const firstKey = Object.keys(byDate)[0] as keyof typeof byDate;
-    const p = byDate[key] ?? byDate[firstKey];
-    const normalizedBag = normalizeBag12(p.bagList);
-    const puzzle: DailyPuzzle = { date: key, wordOfDay: p.wordOfDay, bagList: normalizedBag };
+    // 🔁 Use PT date by default; still allow explicit override via dateKey.
+    const key = dateKey || pacificDateKey()
 
-    const snap = loadSession();
-    const sameDate = snap?.dateKey === key;
+    const byDate = puzzles as Record<string, Omit<DailyPuzzle, 'date'>>
+    const keys = Object.keys(byDate).sort() // ensure chronological order
+    const firstKey = keys[0] as keyof typeof byDate
+
+    // If today's key isn't present (e.g., future day not authored yet),
+    // fall back to the earliest available puzzle.
+    const p = byDate[key] ?? byDate[firstKey]
+
+    const normalizedBag = normalizeBag12(p.bagList)
+    const puzzle: DailyPuzzle = { date: key, wordOfDay: p.wordOfDay, bagList: normalizedBag }
+
+    const snap = loadSession()
+    const sameDate = snap?.dateKey === key
     const samePuzzle =
       sameDate &&
       snap!.puzzle.wordOfDay?.toUpperCase() === (p.wordOfDay || '').toUpperCase() &&
       Array.isArray(snap!.puzzle.bagList) &&
-      snap!.puzzle.bagList.join('') === normalizedBag.join('');
+      snap!.puzzle.bagList.join('') === normalizedBag.join('')
 
     if (samePuzzle) {
       set({
@@ -200,11 +207,11 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
           typeof window !== 'undefined'
             ? window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
             : false,
-      });
-      return;
+      })
+      return
     }
 
-    const bagCounts = counts(normalizedBag.join(''));
+    const bagCounts = counts(normalizedBag.join(''))
     set({
       puzzle,
       currentStack: puzzle.wordOfDay.toUpperCase(),
@@ -230,9 +237,9 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
         typeof window !== 'undefined'
           ? window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
           : false,
-    });
+    })
 
-    get().shuffleBag();
+    get().shuffleBag()
   },
 
   pushBagIndex: (bagIndex) => {
@@ -628,6 +635,21 @@ if (typeof window !== 'undefined') {
       }
     }, 120);
   });
+}
+
+function pacificDateKey(d = new Date()): string {
+  // Returns YYYY-MM-DD for America/Los_Angeles (handles DST automatically)
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Los_Angeles',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(d)
+
+  const y = parts.find(p => p.type === 'year')?.value ?? '0000'
+  const m = parts.find(p => p.type === 'month')?.value ?? '01'
+  const day = parts.find(p => p.type === 'day')?.value ?? '01'
+  return `${y}-${m}-${day}`
 }
 
 function upgradeHistory(hist: HistoryItemSnap[] | undefined | null): GameHistoryItem[] {
