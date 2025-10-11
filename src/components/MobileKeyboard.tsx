@@ -17,6 +17,7 @@ export function MobileKeyboard() {
     candidate,
     slotMeta,
     shuffleBag,
+    status,
   } = useGameStore((s) => ({
     keyboardOpen: s.keyboardOpen,
     setKeyboardOpen: s.setKeyboardOpen,
@@ -26,6 +27,7 @@ export function MobileKeyboard() {
     candidate: s.candidate,
     slotMeta: s.slotMeta,
     shuffleBag: s.shuffleBag,
+    status: s.status,
   }))
 
   const [isTouch, setIsTouch] = useState(false)
@@ -36,6 +38,12 @@ export function MobileKeyboard() {
     m?.addEventListener?.('change', upd)
     return () => m?.removeEventListener?.('change', upd)
   }, [])
+
+  useEffect(() => {
+    if (status === 'cleared' && keyboardOpen) {
+      setKeyboardOpen(false)
+    }
+  }, [status, keyboardOpen, setKeyboardOpen])
 
   if (!isTouch || !keyboardOpen) return null
 
@@ -58,7 +66,7 @@ export function MobileKeyboard() {
     <div className="fixed inset-x-0 bottom-0 z-40 sm:hidden">
       {/* Panel is fully constrained to viewport width and safe area */}
       <div className="pointer-events-auto mx-auto w-full max-w-[680px] px-3">
-        <div className="rounded-t-2xl border border-token bg-surface p-3 pb-[max(env(safe-area-inset-bottom),8px)] shadow-2xl">
+        <div className="rounded-t-2xl border border-token bg-surface p-3 pb}[max(env(safe-area-inset-bottom),8px)] shadow-2xl">
           {/* Row 1: 10 equally-sized keys */}
           <div className="mb-2 grid grid-cols-10 gap-1">
             {TOP.split('').map((ch) => (
