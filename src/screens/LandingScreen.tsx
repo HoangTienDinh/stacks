@@ -51,13 +51,16 @@ export default function LandingScreen() {
   const finishedToday = hasRecord(todayKey())
 
   return (
-    <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-white text-slate-900">
+    // <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-white text-slate-900">
+    <div className="flex min-h-screen min-h-[100dvh] w-full flex-col overflow-x-hidden overflow-y-auto bg-white text-slate-900">
+
       {/* CONTENT */}
-      <main className="flex flex-1 flex-col items-center justify-center px-4">
+      {/* <main className="flex flex-1 flex-col items-center justify-center px-4"> */}
+      <main className="flex flex-1 flex-col items-center justify-center px-2 sm:px-4">
         <div className="flex w-full max-w-[560px] flex-col items-center gap-6 sm:gap-8">
           <LogoWordmark letters="STACKS" />
 
-          <p className="text-center text-[clamp(22px,6.2vw,40px)] leading-tight tracking-tight text-slate-800">
+          <p className="text-center text-[clamp(22px,6.2vw,38px)] leading-tight tracking-tight text-slate-800 [text-wrap:balance]">
             Use every tile.
             <br />
             Finish in the fewest <span className="font-semibold">Stacks</span>.
@@ -69,7 +72,7 @@ export default function LandingScreen() {
               <button
                 type="button"
                 onClick={() => go('view')}
-                className="h-[clamp(44px,6vh,40px)] w-[min(60vw,180px)] rounded-full bg-cyan-700 font-semibold text-white shadow-sm transition hover:bg-cyan-600 active:translate-y-[1px]"
+                className="h-[clamp(40px,6vh,40px)] w-[min(60vw,180px)] rounded-full bg-cyan-700 font-semibold text-white shadow-sm transition hover:bg-cyan-600 active:translate-y-[1px]"
               >
                 View Puzzle
               </button>
@@ -77,7 +80,7 @@ export default function LandingScreen() {
               <button
                 type="button"
                 onClick={() => go('game')}
-                className="h-[clamp(44px,6vh,40px)] w-[min(60vw,180px)] rounded-full bg-emerald-600 font-semibold text-white shadow-sm transition hover:bg-emerald-500 active:translate-y-[1px]"
+                className="h-[clamp(40px,6vh,40px)] w-[min(60vw,180px)] rounded-full bg-emerald-600 font-semibold text-white shadow-sm transition hover:bg-emerald-500 active:translate-y-[1px]"
               >
                 Play
               </button>

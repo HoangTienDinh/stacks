@@ -7,21 +7,22 @@ type Props = {
   className?: string
 }
 
-/** Alternates info/blue and accent/green tiles and scales responsively. */
 export function LogoWordmark({ letters = 'STACKS', className }: Props) {
   const chars = letters.split('')
 
   return (
-    <div className={clsx('flex items-center justify-center gap-2 sm:gap-3', className)}>
-      {chars.map((ch, i) => (
-        <Tile
-          key={`${ch}-${i}`}
-          letter={ch}
-          intent={i % 2 === 0 ? 'stack' : 'bag'}
-          // layout sizing stays inline (not theme-driven)
-          className="h-[clamp(52px,14vw,80px)] w-[clamp(52px,14vw,80px)] text-[clamp(20px,5.5vw,34px)]"
-        />
-      ))}
+  <div className={clsx('w-full px-3', className)}>
+    <div className="mx-auto flex max-w-[560px] items-center justify-center gap-1.5 sm:gap-3">
+        {chars.map((ch, i) => (
+          <Tile
+            key={`${ch}-${i}`}
+            letter={ch}
+            intent={i % 2 === 0 ? 'stack' : 'bag'}
+          size="sm"
+          className="h-[clamp(40px,12.5vw,72px)] w-[clamp(40px,12.5vw,72px)] text-[clamp(18px,4.8vw,30px)]"
+          />
+        ))}
+    </div>
     </div>
   )
 }
