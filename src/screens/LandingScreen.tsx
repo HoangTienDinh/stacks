@@ -3,8 +3,25 @@ import { useMemo, useState } from 'react'
 import { HelpModal } from '@/components/HelpModal'
 import { LogoWordmark } from '@/components/LogoWordmark'
 import { ResultModal } from '@/components/ResultModal'
+import puzzles from '@/puzzles/puzzles.json'
 import { hasRecord, todayKey } from '@/stats/stats'
 import { useUIStore } from '@/store/uiStore'
+
+// --- helpers ---
+function getEarliestPuzzleDateKey(): string {
+  // Expecting keys like 'YYYY-MM-DD'
+  const keys = Object.keys(puzzles || {}).filter(Boolean).sort()
+  // Fallback to the known first date if the file is empty
+  return keys[0] ?? '2025-10-08'
+}
+
+function dayDiffInclusive(fromDateKey: string, toDateKey: string): number {
+  // fromDateKey & toDateKey are calendar dates (in PT via todayKey()).
+  // Convert to UTC midnights to compute ordinal difference safely.
+  const toUtcMidnight = (k: string) => new Date(`${k}T00:00:00Z`).getTime()
+  const diffDays = Math.floor((toUtcMidnight(toDateKey) - toUtcMidnight(fromDateKey)) / 86_400_000)
+  return diffDays + 1 // inclusive so the first day is No. 0001
+}
 
 export default function LandingScreen() {
   const go = useUIStore((s) => s.go)
@@ -23,7 +40,14 @@ export default function LandingScreen() {
     }
   }, [])
 
-  const puzzleNo = 'No. 0001' // placeholder
+  // ⬇️ NEW: compute "No. 000X" based on earliest puzzle and today's PT date
+  const puzzleNumber = useMemo(() => {
+    const earliest = getEarliestPuzzleDateKey()
+    const today = todayKey() // already uses Pacific Time logic elsewhere in the app
+    const ordinal = Math.max(1, dayDiffInclusive(earliest, today))
+    return `No. ${String(ordinal).padStart(4, '0')}`
+  }, [])
+
   const finishedToday = hasRecord(todayKey())
 
   return (
@@ -93,7 +117,7 @@ export default function LandingScreen() {
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)' }}
       >
         <div>{todayStr}</div>
-        <div className="tabular-nums">{puzzleNo}</div>
+        <div className="tabular-nums">{puzzleNumber}</div>
         <div>Created by Hoang Dinh</div>
       </footer>
 
