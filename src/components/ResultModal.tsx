@@ -49,7 +49,15 @@ export function ResultModal(props: ResultModalProps) {
 
   const isFromLanding = 'open' in props
   const open = isFromLanding ? props.open : status === 'cleared' && !!lastGame
-  const onClose = isFromLanding ? props.onClose : closeResults
+
+  // NEW: when used from GameScreen (default), closing should navigate to ViewPuzzleScreen
+  const handleClose = isFromLanding
+    ? props.onClose
+    : () => {
+        closeResults()
+        go('view') // go show ViewPuzzleScreen
+      }
+
   if (!open) return null
 
   const title = isFromLanding ? 'Stats' : 'Results'
@@ -77,16 +85,16 @@ export function ResultModal(props: ResultModalProps) {
       closeResults()
       goHome()
     } else {
-      onClose()
+      handleClose()
       go('game')
     }
   }
 
   return (
-    <Modal open={open} onClose={onClose} ariaLabel={title}>
+    <Modal open={open} onClose={handleClose} ariaLabel={title}>
       <header className="flex items-center justify-between border-b border-token px-4 py-3 bg-surface">
         <h2 className="text-lg font-semibold text-text">{title}</h2>
-        <button type="button" onClick={onClose} className="btn" data-variant="outline" data-size="sm">
+        <button type="button" onClick={handleClose} className="btn" data-variant="outline" data-size="sm">
           Close
         </button>
       </header>

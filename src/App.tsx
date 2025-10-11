@@ -1,4 +1,3 @@
-// src/App.tsx
 import { GameScreen } from '@/screens/GameScreen'
 import LandingScreen from '@/screens/LandingScreen'
 import ViewPuzzleScreen from '@/screens/ViewPuzzleScreen'
