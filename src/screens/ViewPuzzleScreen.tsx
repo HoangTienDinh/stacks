@@ -8,13 +8,22 @@ import { useUIStore } from '@/store/uiStore'
 
 export default function ViewPuzzleScreen() {
   const go = useUIStore((s) => s.go)
-  const { puzzle, loadToday } = useGameStore((s) => ({ puzzle: s.puzzle, loadToday: s.loadToday }))
+  const { puzzle, loadToday, lastGame } = useGameStore((s) => ({
+    puzzle: s.puzzle,
+    loadToday: s.loadToday,
+    lastGame: s.lastGame,
+  }))
 
   useEffect(() => {
     loadToday()
   }, [loadToday])
 
-  const record = useMemo(() => getRecordByDate(todayKey()), [])
+  const today = todayKey()
+  const record = useMemo(
+    () => getRecordByDate(today) || (lastGame?.dateKey === today ? lastGame : null),
+    [today, lastGame]
+  )
+
   useEffect(() => {
     if (!record) go('landing')
   }, [record, go])

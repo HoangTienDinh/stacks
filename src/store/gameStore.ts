@@ -6,6 +6,7 @@ import { counts } from '@/game/counts';
 import { validateMove } from '@/game/validate';
 import { clearSession, loadSession, saveSession } from '@/persistence/session';
 import puzzles from '@/puzzles/puzzles.json';
+import { todayKey as statsTodayKey } from '@/stats/stats'; // <-- use same key everywhere
 import { useUIStore } from '@/store/uiStore';
 
 import type { DailyPuzzle, GameHistoryItem, GameState } from '@/game/models';
@@ -158,27 +159,26 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
   flights: [],
 
   loadToday: (dateKey) => {
-    // 🔁 Use PT date by default; still allow explicit override via dateKey.
-    const key = dateKey || pacificDateKey()
+    // ✅ Use the same key as stats.todayKey() by default
+    const key = dateKey || statsTodayKey();
 
-    const byDate = puzzles as Record<string, Omit<DailyPuzzle, 'date'>>
-    const keys = Object.keys(byDate).sort() // ensure chronological order
-    const firstKey = keys[0] as keyof typeof byDate
+    const byDate = puzzles as Record<string, Omit<DailyPuzzle, 'date'>>;
+    const keys = Object.keys(byDate).sort();
+    const firstKey = keys[0] as keyof typeof byDate;
 
-    // If today's key isn't present (e.g., future day not authored yet),
-    // fall back to the earliest available puzzle.
-    const p = byDate[key] ?? byDate[firstKey]
+    // If today's date isn't authored yet, fall back to earliest available.
+    const p = byDate[key] ?? byDate[firstKey];
 
-    const normalizedBag = normalizeBag12(p.bagList)
-    const puzzle: DailyPuzzle = { date: key, wordOfDay: p.wordOfDay, bagList: normalizedBag }
+    const normalizedBag = normalizeBag12(p.bagList);
+    const puzzle: DailyPuzzle = { date: key, wordOfDay: p.wordOfDay, bagList: normalizedBag };
 
-    const snap = loadSession()
-    const sameDate = snap?.dateKey === key
+    const snap = loadSession();
+    const sameDate = snap?.dateKey === key;
     const samePuzzle =
       sameDate &&
       snap!.puzzle.wordOfDay?.toUpperCase() === (p.wordOfDay || '').toUpperCase() &&
       Array.isArray(snap!.puzzle.bagList) &&
-      snap!.puzzle.bagList.join('') === normalizedBag.join('')
+      snap!.puzzle.bagList.join('') === normalizedBag.join('');
 
     if (samePuzzle) {
       set({
@@ -207,11 +207,11 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
           typeof window !== 'undefined'
             ? window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
             : false,
-      })
-      return
+      });
+      return;
     }
 
-    const bagCounts = counts(normalizedBag.join(''))
+    const bagCounts = counts(normalizedBag.join(''));
     set({
       puzzle,
       currentStack: puzzle.wordOfDay.toUpperCase(),
@@ -237,9 +237,9 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
         typeof window !== 'undefined'
           ? window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
           : false,
-    })
+    });
 
-    get().shuffleBag()
+    get().shuffleBag();
   },
 
   pushBagIndex: (bagIndex) => {
@@ -505,8 +505,9 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
       const now = Date.now();
       const dur = computeDurationSec(get().timer);
 
+      const key = statsTodayKey(); // ✅ date key aligned with stats
       const record = {
-        dateKey: ns.puzzle.date,
+        dateKey: key,
         finishedAt: now,
         durationSec: dur,
         stacksCleared: newRows.length,
@@ -514,12 +515,16 @@ export const useGameStore = create<GameState & Actions & UIState>((set, get) => 
         rows: newRows,
       };
 
+      // Persist record so Landing/View can detect completion
       saveGame(record);
+
       set({
         status: 'cleared',
         lastGame: record,
         timer: { running: false, startedAt: null, pausedAt: null, accumSec: dur },
+        keyboardOpen: false, // hide mobile keyboard under modal
       });
+
       clearSession();
     }
   },
@@ -635,21 +640,6 @@ if (typeof window !== 'undefined') {
       }
     }, 120);
   });
-}
-
-function pacificDateKey(d = new Date()): string {
-  // Returns YYYY-MM-DD for America/Los_Angeles (handles DST automatically)
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Los_Angeles',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(d)
-
-  const y = parts.find(p => p.type === 'year')?.value ?? '0000'
-  const m = parts.find(p => p.type === 'month')?.value ?? '01'
-  const day = parts.find(p => p.type === 'day')?.value ?? '01'
-  return `${y}-${m}-${day}`
 }
 
 function upgradeHistory(hist: HistoryItemSnap[] | undefined | null): GameHistoryItem[] {

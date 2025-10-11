@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Modal } from '@/components/Modal'
 import { computeStats, formatClock, loadGames, makeShare, todayKey } from '@/stats/stats'
@@ -15,11 +15,10 @@ type ResultModalProps =
     }
 
 export function ResultModal(props: ResultModalProps) {
-  const { status, lastGame, closeResults, goHome } = useGameStore((s) => ({
+  const { status, lastGame, closeResults } = useGameStore((s) => ({
     status: s.status,
     lastGame: s.lastGame,
     closeResults: s.closeResults,
-    goHome: s.goHome,
   }))
   const go = useUIStore((s) => s.go)
 
@@ -50,13 +49,14 @@ export function ResultModal(props: ResultModalProps) {
   const isFromLanding = 'open' in props
   const open = isFromLanding ? props.open : status === 'cleared' && !!lastGame
 
-  // NEW: when used from GameScreen (default), closing should navigate to ViewPuzzleScreen
-  const handleClose = isFromLanding
-    ? props.onClose
-    : () => {
-        closeResults()
-        go('view') // go show ViewPuzzleScreen
-      }
+  const handleClose = useCallback(() => {
+    if (isFromLanding) {
+      props.onClose()
+      return
+    }
+    closeResults()
+    queueMicrotask(() => go('view'))
+  }, [isFromLanding, props, closeResults, go])
 
   if (!open) return null
 
@@ -78,15 +78,12 @@ export function ResultModal(props: ResultModalProps) {
     }
   }
 
-  const hideSecondary = isFromLanding && !!todayRecord
-  const secondaryCta = todayRecord ? 'Main' : "Play Today's Puzzle"
   const onSecondary = () => {
-    if (todayRecord) {
-      closeResults()
-      goHome()
+    if (isFromLanding) {
+      props.onClose()
     } else {
-      handleClose()
-      go('game')
+      closeResults()
+      go('landing')
     }
   }
 
@@ -121,9 +118,7 @@ export function ResultModal(props: ResultModalProps) {
         </div>
 
         {/* Actions */}
-        <div
-          className={clsx('flex items-center gap-3 pt-2', hideSecondary ? 'justify-center' : 'justify-between')}
-        >
+        <div className={clsx('flex items-center gap-3 pt-2', 'justify-between')}>
           <button
             type="button"
             onClick={onShare}
@@ -136,17 +131,15 @@ export function ResultModal(props: ResultModalProps) {
             Share
           </button>
 
-          {!hideSecondary && (
-            <button
-              type="button"
-              onClick={onSecondary}
-              className="btn flex-1"
-              data-variant="outline"
-              data-size="md"
-            >
-              {secondaryCta}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={onSecondary}
+            className="btn flex-1"
+            data-variant="outline"
+            data-size="md"
+          >
+            Main
+          </button>
         </div>
 
         {/* Copy feedback */}
